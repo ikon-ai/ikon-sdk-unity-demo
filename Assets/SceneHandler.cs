@@ -3,15 +3,21 @@ using Ikon.Common.Protocol;
 using Ikon.Common.ReactiveUI;
 using Ikon.Sdk.DotNet;
 using System;
+using System.Collections.Concurrent;
 using System.Threading.Tasks;
+using TMPro;
 using UnityEngine;
 
-public class SceneHandler : MonoBehaviour
+public class SceneHandler : MonoBehaviour, IIkonClientListener
 {
+    public TMP_InputField ChatInputField;
+    public TMP_Text ChatOutputText;
+
     private IIkonClient _ikonClient;
     private UIController _uiController;
+    private readonly ConcurrentQueue<string> _outputMessages = new();
 
-    async void Start()
+    public async void Start()
     {
         Log.Instance.AddLogHandler(OnLogEvent);
         Log.Instance.Info($"Ikon .NET SDK, version: {Ikon.Sdk.DotNet.Version.VersionString}");
@@ -38,13 +44,61 @@ public class SceneHandler : MonoBehaviour
         }
 
         _ikonClient = await Sdk.CreateIkonClientAsync(apiKey, spaceId, userId, useProductionEndpoint);
-        _ikonClient.AddCallback(new IkonClientListener());
+        _ikonClient.AddCallback(this);
         IRoom room = _ikonClient.GetRoomByName(roomName);
         await room.ConnectAsync();
         _uiController = new UIController(room);
     }
 
-    public void OnLogEvent(LogEvent logEvent)
+    public async void OnApplicationQuit()
+    {
+        if (_ikonClient != null)
+        {
+            await _ikonClient.DisposeAsync();
+            _ikonClient = null;
+        }
+
+        _uiController = null;
+    }
+
+    public async Task OnMessage(IRoom room, Message message)
+    {
+        await Task.CompletedTask;
+
+        if (message.Opcode == Opcode.CHAT_MESSAGE_COMPLETE)
+        {
+            var chatMessageComplete = message.DeserializePayload<ChatMessageComplete>();
+            var userName = room.GlobalState.GetUserName(chatMessageComplete.UserId);
+
+            if (string.IsNullOrWhiteSpace(userName))
+            {
+                userName = "Unknown";
+            }
+
+            _outputMessages.Enqueue($"{userName}: {chatMessageComplete.GetText()}");
+        }
+    }
+
+    public void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+        {
+            using (var container = _uiController.CreateContainer())
+            {
+                container.AddChatTextFullFrame(ChatInputField.text);
+            }
+
+            ChatInputField.text = string.Empty;
+            ChatInputField.ActivateInputField();
+        }
+
+        while (_outputMessages.TryDequeue(out string outputMessage))
+        {
+            ChatOutputText.text += outputMessage + "\n\n";
+        }
+    }
+
+    private void OnLogEvent(LogEvent logEvent)
     {
         switch (logEvent.Type)
         {
@@ -59,45 +113,5 @@ public class SceneHandler : MonoBehaviour
                 Debug.Log($"{logEvent.Type}: {logEvent.Message}");
                 break;
         }
-    }
-
-    async void OnApplicationQuit()
-    {
-        if (_ikonClient != null)
-        {
-            await _ikonClient.DisposeAsync();
-            _ikonClient = null;
-        }
-
-        _uiController = null;
-    }
-
-    private class IkonClientListener : IIkonClientListener
-    {
-        public async Task OnMessage(IRoom room, Message message)
-        {
-            await Task.CompletedTask;
-
-            if (message.Opcode == Opcode.CHAT_MESSAGE_COMPLETE)
-            {
-                var chatMessageComplete = message.DeserializePayload<ChatMessageComplete>();
-
-                if (chatMessageComplete.IsHistory)
-                {
-                    return;
-                }
-
-                if (chatMessageComplete.UserId == room.ClientContext.UserId)
-                {
-                    return;
-                }
-
-                Debug.Log($"{room.GlobalState.GetUserName(chatMessageComplete.UserId)}: {chatMessageComplete.GetText()}");
-            }
-        }
-    }
-
-    void Update()
-    {
     }
 }
