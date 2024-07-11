@@ -1,6 +1,5 @@
-using Ikon.Common;
-using Ikon.Common.Protocol;
-using Ikon.Common.ReactiveUI;
+using Ikon.Common.Core;
+using Ikon.Common.Core.Protocol;
 using Ikon.Sdk.DotNet;
 using System;
 using System.Collections.Concurrent;
@@ -8,13 +7,13 @@ using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 
-public class SceneHandler : MonoBehaviour, IIkonClientListener
+public class SceneHandler : MonoBehaviour
 {
     public TMP_InputField ChatInputField;
     public TMP_Text ChatOutputText;
 
     private IIkonClient _ikonClient;
-    private UIController _uiController;
+    private Room _room;
     private readonly ConcurrentQueue<string> _outputMessages = new();
 
     public async void Start()
@@ -22,32 +21,38 @@ public class SceneHandler : MonoBehaviour, IIkonClientListener
         Log.Instance.AddLogHandler(OnLogEvent);
         Log.Instance.Info($"Ikon .NET SDK, version: {Ikon.Sdk.DotNet.Version.VersionString}");
 
-        // Get the API key from the Ikon Portal and then supply it with e.g. environment variable. Do not hardcode it.
-        var apiKey = Environment.GetEnvironmentVariable("IKON_SDK_API_KEY");
+        var clientInfo = new Sdk.ClientInfo
+        {
+            // Get the API key from the Ikon Portal and then supply it with e.g. environment variable. Do not hardcode it.
+            ApiKey = Environment.GetEnvironmentVariable("IKON_SDK_API_KEY") ?? throw new Exception("API key is missing. Please set the 'IKON_SDK_API_KEY' environment variable."),
 
-        // Get the space ID from Ikon Portal. This can be hardcoded.
-        var spaceId = Environment.GetEnvironmentVariable("IKON_SDK_SPACE_ID") ?? "<<SET_SPACE_ID_HERE>>";
+            // Get the space ID from Ikon Portal. This can be hardcoded.
+            SpaceId = Environment.GetEnvironmentVariable("IKON_SDK_SPACE_ID") ?? "<<SET_SPACE_ID_HERE>>",
 
-        // Use unique ID for the player. This can be the player's ID in your game. This can be hardcoded.
-        var userId = Environment.GetEnvironmentVariable("IKON_SDK_USER_ID") ?? "<<SET_USER_ID_HERE>>";
+            // Set a unique ID for the player. This can be the player's ID in your game. This can be hardcoded.
+            UserId = Environment.GetEnvironmentVariable("IKON_SDK_USER_ID") ?? "<<SET_USER_ID_HERE>>",
 
-        // Set the room name to use. This can be hardcoded.
+            // Use the production endpoint by default. Set to false to use the development endpoint.
+            UseProductionEndpoint = Environment.GetEnvironmentVariable("IKON_SDK_USE_PROD_ENDPOINT")?.Trim().Equals("true", StringComparison.InvariantCultureIgnoreCase) ?? true,
+            RequestTimeout = 5.0,
+
+            Description = "Ikon SDK Unity Example",
+            DeviceId = Utils.GenerateDeviceId(),
+            ProductId = "Ikon.Sdk.DotNet.Examples.Unity",
+            VersionId = "1",
+            InstallId = "1",
+            UserType = UserType.Human,
+            OpcodeGroupsFromServer = Opcode.GROUP_ALL,
+            OpcodeGroupsToServer = Opcode.GROUP_ALL,
+        };
+
+        // Set the room name to use
         var roomName = Environment.GetEnvironmentVariable("IKON_SDK_ROOM_NAME") ?? "<<SET_ROOM_NAME_HERE>>";
 
-        // Use the production endpoint by default. Set to false to use the internal dev endpoint.
-        var useProductionEndpointString = Environment.GetEnvironmentVariable("IKON_SDK_USE_PROD_ENDPOINT") ?? "true";
-        bool useProductionEndpoint = useProductionEndpointString.Trim().Equals("true", StringComparison.InvariantCultureIgnoreCase);
-
-        if (string.IsNullOrWhiteSpace(apiKey))
-        {
-            throw new Exception("API key is missing. Please set the 'IKON_SDK_API_KEY' environment variable.");
-        }
-
-        _ikonClient = await Sdk.CreateIkonClientAsync(apiKey, spaceId, userId, useProductionEndpoint);
-        _ikonClient.AddCallback(this);
-        IRoom room = _ikonClient.GetRoomByName(roomName);
-        await room.ConnectAsync();
-        _uiController = new UIController(room);
+        _ikonClient = await Sdk.CreateIkonClientAsync(clientInfo);
+        _room = new Room(_ikonClient, roomName);
+        _room.OnText += RoomOnText;
+        await _room.ConnectAsync();
     }
 
     public async void OnApplicationQuit()
@@ -57,36 +62,22 @@ public class SceneHandler : MonoBehaviour, IIkonClientListener
             await _ikonClient.DisposeAsync();
             _ikonClient = null;
         }
-
-        _uiController = null;
     }
 
-    public async Task OnMessage(IRoom room, Message message)
+    private Task RoomOnText(OnTextArgs e)
     {
-        await Task.CompletedTask;
+        _outputMessages.Enqueue($"{e.UserName}: {e.Text}");
 
-        if (message.Opcode == Opcode.CHAT_MESSAGE_COMPLETE)
-        {
-            var chatMessageComplete = message.DeserializePayload<ChatMessageComplete>();
-            var userName = room.GlobalState.GetUserName(chatMessageComplete.UserId);
-
-            if (string.IsNullOrWhiteSpace(userName))
-            {
-                userName = "Unknown";
-            }
-
-            _outputMessages.Enqueue($"{userName}: {chatMessageComplete.GetText()}");
-        }
+        return Task.CompletedTask;
     }
 
     public void Update()
     {
         if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
         {
-            using (var container = _uiController.CreateContainer())
-            {
-                container.AddChatTextFullFrame(ChatInputField.text);
-            }
+            _outputMessages.Enqueue($"User: {ChatInputField.text}");
+
+            _room.SendText(ChatInputField.text);
 
             ChatInputField.text = string.Empty;
             ChatInputField.ActivateInputField();
@@ -102,13 +93,19 @@ public class SceneHandler : MonoBehaviour, IIkonClientListener
     {
         switch (logEvent.Type)
         {
-            case Ikon.Common.Protocol.LogType.Warning:
+            case Ikon.Common.Core.Protocol.LogType.Warning:
+            {
                 Debug.LogWarning($"{logEvent.Type}: {logEvent.Message}");
                 break;
-            case Ikon.Common.Protocol.LogType.Error:
-            case Ikon.Common.Protocol.LogType.Critical:
+            }
+
+            case Ikon.Common.Core.Protocol.LogType.Error:
+            case Ikon.Common.Core.Protocol.LogType.Critical:
+            {
                 Debug.LogError($"{logEvent.Type}: {logEvent.Message}");
                 break;
+            }
+
             default:
                 Debug.Log($"{logEvent.Type}: {logEvent.Message}");
                 break;
