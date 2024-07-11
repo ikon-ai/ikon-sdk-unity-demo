@@ -1,7 +1,7 @@
 
-# Ikon Unity SDK Example Documentation
+# Ikon Unity SDK Example
 
-Welcome to the Ikon Unity SDK Example documentation. This project is designed to show how to use Ikon AI SDK with Unity.
+Welcome to the Ikon Unity SDK Example. This project is designed to show how to use Ikon AI SDK with Unity.
 
 ## Getting Started
 
