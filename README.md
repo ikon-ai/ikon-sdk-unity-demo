@@ -5,7 +5,7 @@ Welcome to the Ikon Unity SDK Example documentation. This project is designed to
 
 ## Getting Started
 
-- Install Unity (LTS 2023.2.20f1 recommended)
+- Install Unity (LTS 2022.3.37f1 recommended)
 - Download this project and unzip it to a local folder.
 - You need a space ID, an API key, and a user ID. These credentials are necessary for initializing and authenticating your SDK instance. You can get these from the Ikon Portal.
 
