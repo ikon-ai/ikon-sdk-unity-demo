@@ -19,12 +19,13 @@ public class SceneHandler : MonoBehaviour
     public async void Start()
     {
         Log.Instance.AddLogHandler(OnLogEvent);
-        Log.Instance.Info($"Ikon .NET SDK, version: {Ikon.Sdk.DotNet.Version.VersionString}");
+        Log.Instance.Info($"Ikon AI C# SDK, version: {Ikon.Sdk.DotNet.Version.VersionString}");
 
         var clientInfo = new Sdk.ClientInfo
         {
             // Get the API key from the Ikon Portal and then supply it with e.g. environment variable. Do not hardcode it.
-            ApiKey = Environment.GetEnvironmentVariable("IKON_SDK_API_KEY") ?? throw new Exception("API key is missing. Please set the 'IKON_SDK_API_KEY' environment variable."),
+            ApiKey = Environment.GetEnvironmentVariable("IKON_SDK_API_KEY") ??
+                     throw new Exception("API key is missing. Please set the 'IKON_SDK_API_KEY' environment variable."),
 
             // Get the space ID from Ikon Portal. This can be hardcoded.
             SpaceId = Environment.GetEnvironmentVariable("IKON_SDK_SPACE_ID") ?? "<<SET_SPACE_ID_HERE>>",
@@ -33,10 +34,12 @@ public class SceneHandler : MonoBehaviour
             UserId = Environment.GetEnvironmentVariable("IKON_SDK_USER_ID") ?? "<<SET_USER_ID_HERE>>",
 
             // Use the production endpoint by default. Set to false to use the development endpoint.
-            UseProductionEndpoint = Environment.GetEnvironmentVariable("IKON_SDK_USE_PROD_ENDPOINT")?.Trim().Equals("true", StringComparison.InvariantCultureIgnoreCase) ?? true,
+            UseProductionEndpoint = Environment.GetEnvironmentVariable("IKON_SDK_USE_PROD_ENDPOINT")?.Trim()
+                .Equals("true", StringComparison.InvariantCultureIgnoreCase) ?? true,
+
             RequestTimeout = 5.0,
 
-            Description = "Ikon SDK Unity Example",
+            Description = "Ikon AI SDK Unity Example",
             DeviceId = Utils.GenerateDeviceId(),
             ProductId = "Ikon.Sdk.DotNet.Examples.Unity",
             VersionId = "1",
