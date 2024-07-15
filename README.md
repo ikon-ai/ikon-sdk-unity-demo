@@ -7,7 +7,7 @@ Welcome to the Ikon AI SDK Unity Example. This project is designed to show how t
 
 - Install Unity Hub
 - Install Unity Editor using the Hub (Latest 2022 LTS recommended)
-- [Download](https://github.com/ikonlive/ikon-sdk-unity-demo/releases/) the source code of this project and unzip it to a local folder
+- [Download](https://github.com/ikon-ai/ikon-sdk-unity-demo/releases/) the source code of this project and unzip it to a local folder
 - You need an API key, a space ID, and a user ID. These credentials are necessary for initializing and authenticating your SDK instance. You can get these from the Ikon Portal.
 
 ## Running
