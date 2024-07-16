@@ -49,11 +49,11 @@ public class SceneHandler : MonoBehaviour
             OpcodeGroupsToServer = Opcode.GROUP_ALL,
         };
 
-        // Set the room name to use
-        var roomName = Environment.GetEnvironmentVariable("IKON_SDK_ROOM_NAME") ?? "<<SET_ROOM_NAME_HERE>>";
+        // Set the room slug to use
+        var roomSlug = Environment.GetEnvironmentVariable("IKON_SDK_ROOM_SLUG") ?? "<<SET_ROOM_SLUG_HERE>>";
 
         _ikonClient = await Sdk.CreateIkonClientAsync(clientInfo);
-        _room = new Room(_ikonClient, roomName);
+        _room = new Room(_ikonClient, roomSlug);
         _room.OnText += RoomOnText;
         await _room.ConnectAsync();
     }

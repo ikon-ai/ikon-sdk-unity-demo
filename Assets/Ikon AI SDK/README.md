@@ -47,8 +47,8 @@ var ikonClient = await Sdk.CreateIkonClientAsync(clientInfo);
 Once the client is initialized, you can connect to a room, send messages, and handle various room-related events.
 
 ```csharp
-var roomName = Environment.GetEnvironmentVariable("IKON_SDK_ROOM_NAME") ?? "<<SET_ROOM_NAME_HERE>>";
-var room = new Room(ikonClient, roomName);
+var roomSlug = Environment.GetEnvironmentVariable("IKON_SDK_ROOM_SLUG") ?? "<<SET_ROOM_SLUG_HERE>>";
+var room = new Room(ikonClient, roomSlug);
 await room.ConnectAsync();
 ```
 
@@ -57,8 +57,7 @@ await room.ConnectAsync();
 To send messages to a room:
 
 ```csharp
-string text = "Hello, Ikon!";
-room.SendText(text);
+room.SendText("Hello, Ikon!");
 ```
 
 ### Handling Events
