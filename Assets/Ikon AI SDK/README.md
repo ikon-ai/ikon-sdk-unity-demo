@@ -75,6 +75,15 @@ private async Task Room_OnText(OnTextArgs e)
 room.OnText += Room_OnText;
 ```
 
+### Helper Functions
+
+```csharp
+room.SetState("TestVariable", 1234); // Set any variable defined in the Input section
+room.GenerateAnswer(); // Generate an answer without providing any input
+room.ClearMessageHistory(); // Clear the message history of the whole room
+room.EnableServerLogRendering = true; // Enable server log rendering (works only in dev environment)
+```
+
 ### Example Program
 
 For an up-to-date example program, see the included `Ikon.Sdk.DotNet.Examples.Chat/Program.cs` source file.
