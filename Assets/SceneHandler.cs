@@ -55,6 +55,7 @@ public class SceneHandler : MonoBehaviour
         _ikonClient = await Sdk.CreateIkonClientAsync(clientInfo);
         _room = new Room(_ikonClient, roomSlug);
         _room.OnText += RoomOnText;
+        _room.EnableServerLogRendering = true;
         await _room.ConnectAsync();
     }
 
