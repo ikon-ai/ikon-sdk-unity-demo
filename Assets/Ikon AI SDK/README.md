@@ -62,23 +62,24 @@ room.SendText("Hello, Ikon!");
 
 ### Handling Events
 
-Implement the event handler to manage different room events, e.g. OnText, OnConnect, OnDisconnect, etc.
+Implement the event handlers to manage different room events, e.g. Start, Shutdown, Text, and more.
 
 ```csharp
-private async Task Room_OnText(OnTextArgs e)
+private async Task OnRoomText(object sender, Room.TextArgs e)
 {
     await Task.CompletedTask;
-    Console.WriteLine($"{e.UserName}: {e.Text}");
+    Console.WriteLine($"\n{e.UserName}: {e.Text}\n");
 }
 
 // Assign the event handler
-room.OnText += Room_OnText;
+room.Text += OnRoomText;
 ```
 
 ### Helper Functions
 
 ```csharp
 room.SetState("TestVariable", 1234); // Set any variable defined in the Input section
+room.ClearState(); // Clear all variables from the state
 room.GenerateAnswer(); // Generate an answer without providing any input
 room.ClearMessageHistory(); // Clear the message history of the whole room
 room.EnableServerLogRendering = true; // Enable server log rendering (works only in dev environment)

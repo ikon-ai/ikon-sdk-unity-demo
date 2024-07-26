@@ -54,8 +54,8 @@ public class SceneHandler : MonoBehaviour
 
         _ikonClient = await Sdk.CreateIkonClientAsync(clientInfo);
         _room = new Room(_ikonClient, roomSlug);
-        _room.OnText += RoomOnText;
-        _room.EnableServerLogRendering = true;
+        _room.Text += RoomOnText;
+        //_room.EnableServerLogRendering = true;
         await _room.ConnectAsync();
     }
 
@@ -68,10 +68,9 @@ public class SceneHandler : MonoBehaviour
         }
     }
 
-    private Task RoomOnText(OnTextArgs e)
+    private Task RoomOnText(object sender, Room.TextArgs e)
     {
         _outputMessages.Enqueue($"{e.UserName}: {e.Text}");
-
         return Task.CompletedTask;
     }
 
