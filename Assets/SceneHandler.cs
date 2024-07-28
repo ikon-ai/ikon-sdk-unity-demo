@@ -11,6 +11,7 @@ public class SceneHandler : MonoBehaviour
 {
     public TMP_InputField ChatInputField;
     public TMP_Text ChatOutputText;
+    public ButtonHandler ButtonHandler;
 
     private IIkonClient _ikonClient;
     private Room _room;
@@ -55,8 +56,11 @@ public class SceneHandler : MonoBehaviour
         _ikonClient = await Sdk.CreateIkonClientAsync(clientInfo);
         _room = new Room(_ikonClient, roomSlug);
         _room.Text += RoomOnText;
-        //_room.EnableServerLogRendering = true;
         await _room.ConnectAsync();
+
+        ButtonHandler.OnShortClick += HandleShortClick;
+        ButtonHandler.OnLongPressInitiated += HandleLongPressInitiated;
+        ButtonHandler.OnLongPressReleased += HandleLongPressReleased;
     }
 
     public async void OnApplicationQuit()
@@ -66,6 +70,10 @@ public class SceneHandler : MonoBehaviour
             await _ikonClient.DisposeAsync();
             _ikonClient = null;
         }
+
+        ButtonHandler.OnShortClick -= HandleShortClick;
+        ButtonHandler.OnLongPressInitiated -= HandleLongPressInitiated;
+        ButtonHandler.OnLongPressReleased -= HandleLongPressReleased;
     }
 
     private Task RoomOnText(object sender, Room.TextArgs e)
@@ -78,18 +86,39 @@ public class SceneHandler : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
         {
-            _outputMessages.Enqueue($"User: {ChatInputField.text}");
-
-            _room.SendText(ChatInputField.text);
-
-            ChatInputField.text = string.Empty;
-            ChatInputField.ActivateInputField();
+            SendCurrentInput();
         }
 
         while (_outputMessages.TryDequeue(out string outputMessage))
         {
             ChatOutputText.text += outputMessage + "\n\n";
         }
+    }
+
+    private void HandleShortClick()
+    {
+        SendCurrentInput();
+    }
+
+    private void HandleLongPressInitiated()
+    {
+    }
+
+    private void HandleLongPressReleased()
+    {
+    }
+
+    private void SendCurrentInput()
+    {
+        if (string.IsNullOrWhiteSpace(ChatInputField.text))
+        {
+            return;
+        }
+
+        _outputMessages.Enqueue($"User: {ChatInputField.text}");
+        _room.SendText(ChatInputField.text);
+        ChatInputField.text = string.Empty;
+        ChatInputField.ActivateInputField();
     }
 
     private void OnLogEvent(LogEvent logEvent)
