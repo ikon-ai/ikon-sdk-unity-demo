@@ -2,6 +2,7 @@ using Ikon.Common.Core;
 using Ikon.Common.Core.Protocol;
 using Ikon.Sdk.DotNet;
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using TMPro;
@@ -17,6 +18,7 @@ public class SceneHandler : MonoBehaviour
     private IIkonClient _ikonClient;
     private Room _room;
     private readonly ConcurrentQueue<string> _outputMessages = new();
+    private AudioClip _recordedAudioClip;
 
     public async void Start()
     {
@@ -91,6 +93,19 @@ public class SceneHandler : MonoBehaviour
         }
     }
 
+    private void SendCurrentInput()
+    {
+        if (string.IsNullOrWhiteSpace(ChatInputField.text))
+        {
+            return;
+        }
+
+        _outputMessages.Enqueue($"User: {ChatInputField.text}");
+        _room.SendText(ChatInputField.text);
+        ChatInputField.text = string.Empty;
+        ChatInputField.ActivateInputField();
+    }
+
     private Task OnRoomText(object sender, Room.TextArgs e)
     {
         _outputMessages.Enqueue($"{e.UserName}: {e.Text}");
@@ -104,23 +119,36 @@ public class SceneHandler : MonoBehaviour
 
     private void OnSendButtonLongPressStart()
     {
+        _recordedAudioClip = Microphone.Start(null, false, 60, 24000);
     }
 
     private void OnSendButtonLongPressStop()
     {
+        StartCoroutine(OnSendButtonLongPressStopCoroutine());
     }
 
-    private void SendCurrentInput()
+    private IEnumerator OnSendButtonLongPressStopCoroutine()
     {
-        if (string.IsNullOrWhiteSpace(ChatInputField.text))
+        if (_recordedAudioClip == null)
         {
-            return;
+            yield break;
         }
 
-        _outputMessages.Enqueue($"User: {ChatInputField.text}");
-        _room.SendText(ChatInputField.text);
-        ChatInputField.text = string.Empty;
-        ChatInputField.ActivateInputField();
+        yield return new WaitForEndOfFrame();
+
+        int position = Microphone.GetPosition(null);
+        Microphone.End(null);
+
+        if (position == 0)
+        {
+            yield break;
+        }
+
+        var recordedAudioData = new float[position * _recordedAudioClip.channels];
+        _recordedAudioClip.GetData(recordedAudioData, 0);
+        _recordedAudioClip = null;
+
+        // TODO: Add sending with SDK
     }
 
     private void OnLogEvent(LogEvent logEvent)

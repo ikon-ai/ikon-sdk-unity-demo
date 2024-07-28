@@ -501,7 +501,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -10, y: -4780.839}
+  m_AnchoredPosition: {x: -10, y: -4780.8438}
   m_SizeDelta: {x: 760, y: 10000}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &360150064
@@ -1132,8 +1132,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 781388660}
   m_HandleRect: {fileID: 781388659}
   m_Direction: 2
-  m_Value: 1
-  m_Size: 0.037242826
+  m_Value: 1.0000005
+  m_Size: 0.037240777
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -1813,7 +1813,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ChatInputField: {fileID: 73977211}
   ChatOutputText: {fileID: 360150064}
-  ButtonHandler: {fileID: 85691486}
+  SendButtonHandler: {fileID: 85691486}
   AudioOutputHandler: {fileID: 1386321528}
 --- !u!4 &1574343314
 Transform:
