@@ -3,20 +3,21 @@ using UnityEngine.EventSystems;
 
 public class ButtonHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerClickHandler
 {
+    public event System.Action ShortClick;
+    public event System.Action LongPressStart;
+    public event System.Action LongPressStop;
+
     private bool _isPressed;
     private bool _longPressTriggered;
     private float _pressTime;
-    private const float LongPressThreshold = 0.5f;
 
-    public event System.Action OnShortClick;
-    public event System.Action OnLongPressInitiated;
-    public event System.Action OnLongPressReleased;
+    private const float LongPressThreshold = 0.5f;
 
     public void OnPointerClick(PointerEventData eventData)
     {
         if (!_isPressed && !_longPressTriggered)
         {
-            OnShortClick?.Invoke();
+            ShortClick?.Invoke();
         }
     }
 
@@ -36,7 +37,7 @@ public class ButtonHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
 
         if (Time.time - _pressTime >= LongPressThreshold)
         {
-            OnLongPressReleased?.Invoke();
+            LongPressStop?.Invoke();
         }
         else
         {
@@ -49,7 +50,7 @@ public class ButtonHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
         if (_isPressed)
         {
             _longPressTriggered = true;
-            OnLongPressInitiated?.Invoke();
+            LongPressStart?.Invoke();
         }
     }
 }

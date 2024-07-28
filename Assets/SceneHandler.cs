@@ -11,7 +11,8 @@ public class SceneHandler : MonoBehaviour
 {
     public TMP_InputField ChatInputField;
     public TMP_Text ChatOutputText;
-    public ButtonHandler ButtonHandler;
+    public ButtonHandler SendButtonHandler;
+    public AudioOutputHandler AudioOutputHandler;
 
     private IIkonClient _ikonClient;
     private Room _room;
@@ -21,6 +22,10 @@ public class SceneHandler : MonoBehaviour
     {
         Log.Instance.AddLogHandler(OnLogEvent);
         Log.Instance.Info($"Ikon AI C# SDK, version: {Ikon.Sdk.DotNet.Version.VersionString}");
+
+        SendButtonHandler.ShortClick += OnSendButtonShortClick;
+        SendButtonHandler.LongPressStart += OnSendButtonLongPressStart;
+        SendButtonHandler.LongPressStop += OnSendButtonLongPressStop;
 
         var clientInfo = new Sdk.ClientInfo
         {
@@ -54,13 +59,14 @@ public class SceneHandler : MonoBehaviour
         var roomSlug = Environment.GetEnvironmentVariable("IKON_SDK_ROOM_SLUG") ?? "<<SET_ROOM_SLUG_HERE>>";
 
         _ikonClient = await Sdk.CreateIkonClientAsync(clientInfo);
-        _room = new Room(_ikonClient, roomSlug);
-        _room.Text += RoomOnText;
-        await _room.ConnectAsync();
 
-        ButtonHandler.OnShortClick += HandleShortClick;
-        ButtonHandler.OnLongPressInitiated += HandleLongPressInitiated;
-        ButtonHandler.OnLongPressReleased += HandleLongPressReleased;
+        _room = new Room(_ikonClient, roomSlug);
+        _room.Text += OnRoomText;
+        _room.AudioStreamBegin += AudioOutputHandler.OnAudioStreamBegin;
+        _room.AudioFrame += AudioOutputHandler.OnAudioFrame;
+        _room.AudioStreamEnd += AudioOutputHandler.OnAudioStreamEnd;
+
+        await _room.ConnectAsync();
     }
 
     public async void OnApplicationQuit()
@@ -70,16 +76,6 @@ public class SceneHandler : MonoBehaviour
             await _ikonClient.DisposeAsync();
             _ikonClient = null;
         }
-
-        ButtonHandler.OnShortClick -= HandleShortClick;
-        ButtonHandler.OnLongPressInitiated -= HandleLongPressInitiated;
-        ButtonHandler.OnLongPressReleased -= HandleLongPressReleased;
-    }
-
-    private Task RoomOnText(object sender, Room.TextArgs e)
-    {
-        _outputMessages.Enqueue($"{e.UserName}: {e.Text}");
-        return Task.CompletedTask;
     }
 
     public void Update()
@@ -95,16 +91,22 @@ public class SceneHandler : MonoBehaviour
         }
     }
 
-    private void HandleShortClick()
+    private Task OnRoomText(object sender, Room.TextArgs e)
+    {
+        _outputMessages.Enqueue($"{e.UserName}: {e.Text}");
+        return Task.CompletedTask;
+    }
+
+    private void OnSendButtonShortClick()
     {
         SendCurrentInput();
     }
 
-    private void HandleLongPressInitiated()
+    private void OnSendButtonLongPressStart()
     {
     }
 
-    private void HandleLongPressReleased()
+    private void OnSendButtonLongPressStop()
     {
     }
 
