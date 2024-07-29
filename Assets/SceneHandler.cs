@@ -153,9 +153,8 @@ public class SceneHandler : MonoBehaviour
 
         var recordedAudioData = new float[position * _recordedAudioClip.channels];
         _recordedAudioClip.GetData(recordedAudioData, 0);
+        _room.SendFullAudio(recordedAudioData, 24000, _recordedAudioClip.channels);
         _recordedAudioClip = null;
-
-        // TODO: Add sending with SDK
     }
 
     private void OnLogEvent(LogEvent logEvent)
