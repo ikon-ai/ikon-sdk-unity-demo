@@ -65,7 +65,9 @@ public class AudioOutputHandler : MonoBehaviour
 
         _mainThreadActions.Enqueue(() =>
         {
-            AudioSettings.outputSampleRate = e.SampleRate;
+            var audioConfig = AudioSettings.GetConfiguration();
+            audioConfig.sampleRate = e.SampleRate;
+            AudioSettings.Reset(audioConfig);
 
             _audioSource.Stop();
             _audioSource.clip = AudioClip.Create("DynamicClip", e.SampleRate * e.Channels * 10, e.Channels, e.SampleRate, true);

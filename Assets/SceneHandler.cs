@@ -14,6 +14,7 @@ public class SceneHandler : MonoBehaviour
     public TMP_Text ChatOutputText;
     public ButtonHandler SendButtonHandler;
     public AudioOutputHandler AudioOutputHandler;
+    public AudioSource NotificationSound;
 
     private IIkonClient _ikonClient;
     private Room _room;
@@ -124,6 +125,7 @@ public class SceneHandler : MonoBehaviour
 
     private void OnSendButtonLongPressStart()
     {
+        NotificationSound.Play();
         _recordedAudioClip = Microphone.Start(null, false, 60, 24000);
     }
 
