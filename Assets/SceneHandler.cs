@@ -214,9 +214,12 @@ public class SceneHandler : MonoBehaviour
         {
             _mainThreadActions.Enqueue(() =>
             {
-                var audioConfig = AudioSettings.GetConfiguration();
-                audioConfig.sampleRate = e.SampleRate;
-                AudioSettings.Reset(audioConfig);
+                if (_audioStreams.Count == 0)
+                {
+                    var audioConfig = AudioSettings.GetConfiguration();
+                    audioConfig.sampleRate = e.SampleRate;
+                    AudioSettings.Reset(audioConfig);
+                }
 
                 string audioSourceName = $"AudioSource{_audioStreams.Count + 1}";
                 var audioSourceObject = new GameObject(audioSourceName);
