@@ -2,24 +2,31 @@ using Ikon.Common.Core;
 using Ikon.Common.Core.Protocol;
 using Ikon.Sdk.DotNet;
 using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class SceneHandler : MonoBehaviour
 {
     public TMP_InputField ChatInputField;
     public TMP_Text ChatOutputText;
+    public TMP_Text SendButtonText;
     public ButtonHandler SendButtonHandler;
+    public GameObject SendButton;
 
     private IIkonClient _ikonClient;
     private Room _room;
     private readonly ConcurrentQueue<Action> _mainThreadActions = new();
     private readonly Dictionary<string, AudioStream> _audioStreams = new();
-    private AudioClip _audioRecording;
+    private AudioClip _recordingAudioClip;
+    private bool _shouldStartRecording;
+    private bool _shouldStopRecording;
+    private bool _areFirstSamples;
+    private int _previousMicrophonePosition;
+    private int _recordingChannels;
 
     private class AudioStream
     {
@@ -32,7 +39,6 @@ public class SceneHandler : MonoBehaviour
         Log.Instance.AddLogHandler(OnLogEvent);
         Log.Instance.Info($"Ikon AI C# SDK, version: {Ikon.Sdk.DotNet.Version.VersionString}");
 
-        SendButtonHandler.Click += OnSendButtonClick;
         SendButtonHandler.PressStart += OnSendButtonPressStart;
         SendButtonHandler.PressStop += OnSendButtonPressStop;
 
@@ -96,74 +102,105 @@ public class SceneHandler : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
         {
-            SendCurrentInput();
+            if (!string.IsNullOrWhiteSpace(ChatInputField.text))
+            {
+                SendCurrentInput();
+            }
         }
 
         while (_mainThreadActions.TryDequeue(out var action))
         {
             action.Invoke();
         }
+
+        SendButtonText.text = string.IsNullOrWhiteSpace(ChatInputField.text) ? "Record" : "Send";
+
+        HandleAudioRecording();
+    }
+
+    private void HandleAudioRecording()
+    {
+        if (_shouldStartRecording)
+        {
+            _recordingAudioClip = Microphone.Start(null, false, 60, 24000);
+            _recordingChannels = _recordingAudioClip.channels;
+            _areFirstSamples = true;
+            _previousMicrophonePosition = 0;
+            _shouldStartRecording = false;
+            SendButton.GetComponent<Image>().color = Color.green;
+        }
+        else if (_recordingAudioClip != null)
+        {
+            int currentMicrophonePosition = Microphone.GetPosition(null);
+            int samplesLength = currentMicrophonePosition - _previousMicrophonePosition;
+
+            if (samplesLength < 0)
+            {
+                samplesLength = 0;
+                _shouldStopRecording = true;
+            }
+
+            if (samplesLength > 0)
+            {
+                float[] samples = new float[samplesLength * _recordingChannels];
+                _recordingAudioClip.GetData(samples, _previousMicrophonePosition);
+                _previousMicrophonePosition = currentMicrophonePosition;
+                _room.SendAudio(samples, 24000, _recordingChannels, _areFirstSamples, _shouldStopRecording);
+                _areFirstSamples = false;
+            }
+
+            if (samplesLength == 0 && _shouldStopRecording && !_areFirstSamples)
+            {
+                _room.SendAudio(new float[_recordingChannels], 24000, _recordingChannels, _areFirstSamples, _shouldStopRecording);
+            }
+
+            if (_shouldStopRecording)
+            {
+                Microphone.End(null);
+                _recordingAudioClip = null;
+                _shouldStopRecording = false;
+                SendButton.GetComponent<Image>().color = Color.white;
+            }
+        }
     }
 
     private void SendCurrentInput()
     {
-        if (string.IsNullOrWhiteSpace(ChatInputField.text))
-        {
-            return;
-        }
-
         ChatOutputText.text += $"User: {ChatInputField.text}\n\n";
         _room.SendText(ChatInputField.text);
         ChatInputField.text = string.Empty;
         ChatInputField.ActivateInputField();
     }
 
-    private Task OnRoomText(object sender, Room.TextArgs e)
+    private async Task OnRoomText(object sender, Room.TextArgs e)
     {
+        await Task.CompletedTask;
+
         _mainThreadActions.Enqueue(() =>
         {
             ChatOutputText.text += $"{e.UserName}: {e.Text}\n\n";
         });
-
-        return Task.CompletedTask;
-    }
-
-    private void OnSendButtonClick()
-    {
-        SendCurrentInput();
     }
 
     private void OnSendButtonPressStart()
     {
-        _audioRecording = Microphone.Start(null, false, 60, 24000);
+        if (string.IsNullOrWhiteSpace(ChatInputField.text))
+        {
+            _shouldStartRecording = true;
+            _shouldStopRecording = false;
+        }
     }
 
     private void OnSendButtonPressStop()
     {
-        StartCoroutine(OnSendButtonLongPressStopCoroutine());
-    }
-
-    private IEnumerator OnSendButtonLongPressStopCoroutine()
-    {
-        if (_audioRecording == null)
+        if (!string.IsNullOrWhiteSpace(ChatInputField.text))
         {
-            yield break;
+            SendCurrentInput();
         }
-
-        yield return new WaitForEndOfFrame();
-
-        int position = Microphone.GetPosition(null);
-        Microphone.End(null);
-
-        if (position == 0)
+        else
         {
-            yield break;
+            _shouldStopRecording = true;
         }
-
-        var recordedAudioData = new float[position * _audioRecording.channels];
-        _audioRecording.GetData(recordedAudioData, 0);
-        _room.SendFullAudio(recordedAudioData, 24000, _audioRecording.channels);
-        _audioRecording = null;
     }
 
     private async Task OnAudioStreamBegin(object sender, Room.AudioStreamBeginArgs e)
