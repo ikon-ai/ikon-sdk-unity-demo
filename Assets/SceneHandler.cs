@@ -26,7 +26,9 @@ public class SceneHandler : MonoBehaviour
     private bool _shouldStopRecording;
     private bool _areFirstSamples;
     private int _previousMicrophonePosition;
-    private int _recordingChannels;
+    private int _recordingAudioChannels;
+
+    private const int RecordingAudioSampleRate = 24000;
 
     private class AudioStream
     {
@@ -122,8 +124,8 @@ public class SceneHandler : MonoBehaviour
     {
         if (_shouldStartRecording)
         {
-            _recordingAudioClip = Microphone.Start(null, false, 60, 24000);
-            _recordingChannels = _recordingAudioClip.channels;
+            _recordingAudioClip = Microphone.Start(null, false, 60, RecordingAudioSampleRate);
+            _recordingAudioChannels = _recordingAudioClip.channels;
             _areFirstSamples = true;
             _previousMicrophonePosition = 0;
             _shouldStartRecording = false;
@@ -134,6 +136,7 @@ public class SceneHandler : MonoBehaviour
             int currentMicrophonePosition = Microphone.GetPosition(null);
             int samplesLength = currentMicrophonePosition - _previousMicrophonePosition;
 
+            // Sometimes the Unity microphone does not work (usually the first recording), so stop recording
             if (samplesLength < 0)
             {
                 samplesLength = 0;
@@ -142,16 +145,17 @@ public class SceneHandler : MonoBehaviour
 
             if (samplesLength > 0)
             {
-                float[] samples = new float[samplesLength * _recordingChannels];
+                float[] samples = new float[samplesLength * _recordingAudioChannels];
                 _recordingAudioClip.GetData(samples, _previousMicrophonePosition);
                 _previousMicrophonePosition = currentMicrophonePosition;
-                _room.SendAudio(samples, 24000, _recordingChannels, _areFirstSamples, _shouldStopRecording);
+                _room.SendAudio(samples, RecordingAudioSampleRate, _recordingAudioChannels, _areFirstSamples, _shouldStopRecording); // First samples should be sent with IsFirst=true
                 _areFirstSamples = false;
             }
 
+            // If any samples were sent, then it should be made sure that the last samples are sent with IsLast=true
             if (samplesLength == 0 && _shouldStopRecording && !_areFirstSamples)
             {
-                _room.SendAudio(new float[_recordingChannels], 24000, _recordingChannels, _areFirstSamples, _shouldStopRecording);
+                _room.SendAudio(new float[_recordingAudioChannels], RecordingAudioSampleRate, _recordingAudioChannels, false, true);
             }
 
             if (_shouldStopRecording)
@@ -166,8 +170,7 @@ public class SceneHandler : MonoBehaviour
 
     private void SendCurrentInput()
     {
-        ChatOutputText.text += $"User: {ChatInputField.text}\n\n";
-        _room.SendText(ChatInputField.text);
+        _room.SendText(ChatInputField.text, sendBackToSender: true);
         ChatInputField.text = string.Empty;
         ChatInputField.ActivateInputField();
     }
