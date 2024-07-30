@@ -1,4 +1,3 @@
-
 # Ikon AI C# SDK
 
 Welcome to the Ikon AI C# SDK. This SDK is designed to help developers integrate and interact with Ikon's services easily using C#.
@@ -13,7 +12,7 @@ The SDK provides a straightforward API to manage rooms, handle events, and commu
 
 ## Installation
 
-To start using the Ikon AI C# SDK, include the libraries in your C# project. Ensure that your project is compatible with .NET Standard 2.1 or later.
+To start using the Ikon AI C# SDK, include the libraries in your C# project. Ensure that your project is compatible with .NET 8.0 or .NET Standard 2.1.
 
 ## Usage
 
@@ -82,7 +81,6 @@ room.SetState("TestVariable", 1234); // Set any variable defined in the Input se
 room.ClearState(); // Clear all variables from the state
 room.GenerateAnswer(); // Generate an answer without providing any input
 room.ClearMessageHistory(); // Clear the message history of the whole room
-room.EnableServerLogRendering = true; // Enable server log rendering (works only in dev environment)
 ```
 
 ### Example Program
