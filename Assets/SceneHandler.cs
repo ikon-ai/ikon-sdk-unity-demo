@@ -28,12 +28,22 @@ public class SceneHandler : MonoBehaviour
     private int _previousMicrophonePosition;
     private int _recordingAudioChannels;
 
+    private const int PlaybackAudioSampleRate = 48000;
     private const int RecordingAudioSampleRate = 24000;
 
     private class AudioStream
     {
         public GameObject AudioSourceObject;
         public AudioSourceHandler AudioSourceHandler;
+    }
+
+    public void Awake()
+    {
+        Application.targetFrameRate = 30;
+
+        var audioConfig = AudioSettings.GetConfiguration();
+        audioConfig.sampleRate = PlaybackAudioSampleRate;
+        AudioSettings.Reset(audioConfig);
     }
 
     public async void Start()
@@ -210,17 +220,12 @@ public class SceneHandler : MonoBehaviour
     {
         await Task.CompletedTask;
 
+        e.SampleRate = PlaybackAudioSampleRate;
+
         if (!_audioStreams.ContainsKey(e.StreamId))
         {
             _mainThreadActions.Enqueue(() =>
             {
-                if (_audioStreams.Count == 0)
-                {
-                    var audioConfig = AudioSettings.GetConfiguration();
-                    audioConfig.sampleRate = e.SampleRate;
-                    AudioSettings.Reset(audioConfig);
-                }
-
                 string audioSourceName = $"AudioSource{_audioStreams.Count + 1}";
                 var audioSourceObject = new GameObject(audioSourceName);
                 var audioSource = audioSourceObject.AddComponent<AudioSource>();
