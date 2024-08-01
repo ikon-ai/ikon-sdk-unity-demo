@@ -70,8 +70,6 @@ public class SceneHandler : MonoBehaviour
             UseProductionEndpoint = Environment.GetEnvironmentVariable("IKON_SDK_USE_PROD_ENDPOINT")?.Trim()
                 .Equals("true", StringComparison.InvariantCultureIgnoreCase) ?? true,
 
-            RequestTimeout = 5.0,
-
             Description = "Ikon AI SDK Unity Example",
             DeviceId = Utils.GenerateDeviceId(),
             ProductId = "Ikon.Sdk.DotNet.Examples.Unity",
