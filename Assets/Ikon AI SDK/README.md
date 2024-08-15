@@ -48,6 +48,7 @@ Once the client is initialized, you can connect to a channel, send messages, and
 var channelKey = Environment.GetEnvironmentVariable("IKON_SDK_CHANNEL_KEY") ?? "<<SET_CHANNEL_KEY_HERE>>";
 var channel = new Channel(ikonClient, channelKey);
 await channel.ConnectAsync();
+channel.SignalReady();
 ```
 
 ### Sending Messages
@@ -63,14 +64,13 @@ channel.SendText("Hello, Ikon!");
 Implement the event handlers to manage different channel events, e.g. Start, Shutdown, Text, and more.
 
 ```csharp
+channel.Text += OnChannelText;
+
 private async Task OnChannelText(object sender, Channel.TextArgs e)
 {
     await Task.CompletedTask;
     Console.WriteLine($"\n{e.UserName}: {e.Text}\n");
 }
-
-// Assign the event handler
-channel.Text += OnChannelText;
 ```
 
 ### Helper Functions
