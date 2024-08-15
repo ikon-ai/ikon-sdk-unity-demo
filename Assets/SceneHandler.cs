@@ -18,7 +18,7 @@ public class SceneHandler : MonoBehaviour
     public GameObject SendButton;
 
     private IIkonClient _ikonClient;
-    private Room _room;
+    private Channel _channel;
     private readonly ConcurrentQueue<Action> _mainThreadActions = new();
     private readonly Dictionary<string, AudioStream> _audioStreams = new();
     private AudioClip _recordingAudioClip;
@@ -48,7 +48,7 @@ public class SceneHandler : MonoBehaviour
 
     public async void Start()
     {
-        Log.Instance.AddLogHandler(OnLogEvent);
+        Log.Instance.LogEvent += OnLogEvent;
         Log.Instance.Info($"Ikon AI C# SDK, version: {Ikon.Sdk.DotNet.Version.VersionString}");
 
         SendButtonHandler.PressStart += OnSendButtonPressStart;
@@ -80,18 +80,19 @@ public class SceneHandler : MonoBehaviour
             OpcodeGroupsToServer = Opcode.GROUP_ALL,
         };
 
-        // Set the room slug to use
-        var roomSlug = Environment.GetEnvironmentVariable("IKON_SDK_ROOM_SLUG") ?? "<<SET_ROOM_SLUG_HERE>>";
+        // Set the channel key to use
+        var channelKey = Environment.GetEnvironmentVariable("IKON_SDK_CHANNEL_KEY") ?? "<<SET_CHANNEL_KEY_HERE>>";
 
         _ikonClient = await Sdk.CreateIkonClientAsync(clientInfo);
 
-        _room = new Room(_ikonClient, roomSlug);
-        _room.Text += OnRoomText;
-        _room.AudioStreamBegin += OnAudioStreamBegin;
-        _room.AudioFrame += OnAudioFrame;
-        _room.AudioStreamEnd += OnAudioStreamEnd;
+        _channel = new Channel(_ikonClient, channelKey);
+        _channel.Text += OnChannelText;
+        _channel.AudioStreamBegin += OnAudioStreamBegin;
+        _channel.AudioFrame += OnAudioFrame;
+        _channel.AudioStreamEnd += OnAudioStreamEnd;
 
-        await _room.ConnectAsync();
+        await _channel.ConnectAsync();
+        _channel.SignalReady();
     }
 
     public async void OnApplicationQuit()
@@ -156,14 +157,14 @@ public class SceneHandler : MonoBehaviour
                 float[] samples = new float[samplesLength * _recordingAudioChannels];
                 _recordingAudioClip.GetData(samples, _previousMicrophonePosition);
                 _previousMicrophonePosition = currentMicrophonePosition;
-                _room.SendAudio(samples, RecordingAudioSampleRate, _recordingAudioChannels, _areFirstSamples, _shouldStopRecording); // First samples should be sent with IsFirst=true
+                _channel.SendAudio(samples, RecordingAudioSampleRate, _recordingAudioChannels, _areFirstSamples, _shouldStopRecording); // First samples should be sent with IsFirst=true
                 _areFirstSamples = false;
             }
 
             // If any samples were sent, then it should be made sure that the last samples are sent with IsLast=true
             if (samplesLength == 0 && _shouldStopRecording && !_areFirstSamples)
             {
-                _room.SendAudio(new float[_recordingAudioChannels], RecordingAudioSampleRate, _recordingAudioChannels, false, true);
+                _channel.SendAudio(new float[_recordingAudioChannels], RecordingAudioSampleRate, _recordingAudioChannels, false, true);
             }
 
             if (_shouldStopRecording)
@@ -178,12 +179,12 @@ public class SceneHandler : MonoBehaviour
 
     private void SendCurrentInput()
     {
-        _room.SendText(ChatInputField.text, sendBackToSender: true);
+        _channel.SendText(ChatInputField.text, sendBackToSender: true);
         ChatInputField.text = string.Empty;
         ChatInputField.ActivateInputField();
     }
 
-    private async Task OnRoomText(object sender, Room.TextArgs e)
+    private async Task OnChannelText(object sender, Channel.TextArgs e)
     {
         await Task.CompletedTask;
 
@@ -214,7 +215,7 @@ public class SceneHandler : MonoBehaviour
         }
     }
 
-    private async Task OnAudioStreamBegin(object sender, Room.AudioStreamBeginArgs e)
+    private async Task OnAudioStreamBegin(object sender, Channel.AudioStreamBeginArgs e)
     {
         await Task.CompletedTask;
 
@@ -242,7 +243,7 @@ public class SceneHandler : MonoBehaviour
         }
     }
 
-    private async Task OnAudioFrame(object sender, Room.AudioFrameArgs e)
+    private async Task OnAudioFrame(object sender, Channel.AudioFrameArgs e)
     {
         await Task.CompletedTask;
 
@@ -252,7 +253,7 @@ public class SceneHandler : MonoBehaviour
         }
     }
 
-    private async Task OnAudioStreamEnd(object sender, Room.AudioStreamEndArgs e)
+    private async Task OnAudioStreamEnd(object sender, Channel.AudioStreamEndArgs e)
     {
         await Task.CompletedTask;
 
@@ -266,7 +267,7 @@ public class SceneHandler : MonoBehaviour
         }
     }
 
-    private void OnLogEvent(LogEvent logEvent)
+    private void OnLogEvent(object sender, LogEvent logEvent)
     {
         switch (logEvent.Type)
         {

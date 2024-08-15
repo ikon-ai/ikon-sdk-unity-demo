@@ -1,13 +1,13 @@
 # Ikon AI C# SDK
 
 Welcome to the Ikon AI C# SDK. This SDK is designed to help developers integrate and interact with Ikon's services easily using C#.
-The SDK provides a straightforward API to manage rooms, handle events, and communicate within the Ikon platform.
+The SDK provides a straightforward API to manage channels, handle events, and communicate within the Ikon platform.
 
 ## Features
 
 - Initialize client with developer credentials
-- Connect to and manage multiple rooms
-- Send and receive messages within rooms
+- Connect to and manage multiple channels
+- Send and receive messages within channels
 - Event handling before and after connections, and on messages
 
 ## Installation
@@ -40,46 +40,46 @@ var clientInfo = new Sdk.ClientInfo
 var ikonClient = await Sdk.CreateIkonClientAsync(clientInfo);
 ```
 
-### Managing Rooms
+### Managing Channels
 
-Once the client is initialized, you can connect to a room, send messages, and handle various room-related events.
+Once the client is initialized, you can connect to a channel, send messages, and handle various channel-related events.
 
 ```csharp
-var roomSlug = Environment.GetEnvironmentVariable("IKON_SDK_ROOM_SLUG") ?? "<<SET_ROOM_SLUG_HERE>>";
-var room = new Room(ikonClient, roomSlug);
-await room.ConnectAsync();
+var channelKey = Environment.GetEnvironmentVariable("IKON_SDK_CHANNEL_KEY") ?? "<<SET_CHANNEL_KEY_HERE>>";
+var channel = new Channel(ikonClient, channelKey);
+await channel.ConnectAsync();
 ```
 
 ### Sending Messages
 
-To send messages to a room:
+To send messages to a channel:
 
 ```csharp
-room.SendText("Hello, Ikon!");
+channel.SendText("Hello, Ikon!");
 ```
 
 ### Handling Events
 
-Implement the event handlers to manage different room events, e.g. Start, Shutdown, Text, and more.
+Implement the event handlers to manage different channel events, e.g. Start, Shutdown, Text, and more.
 
 ```csharp
-private async Task OnRoomText(object sender, Room.TextArgs e)
+private async Task OnChannelText(object sender, Channel.TextArgs e)
 {
     await Task.CompletedTask;
     Console.WriteLine($"\n{e.UserName}: {e.Text}\n");
 }
 
 // Assign the event handler
-room.Text += OnRoomText;
+channel.Text += OnChannelText;
 ```
 
 ### Helper Functions
 
 ```csharp
-room.SetState("TestVariable", 1234); // Set any variable defined in the Input section
-room.ClearState(); // Clear all variables from the state
-room.GenerateAnswer(); // Generate an answer without providing any input
-room.ClearMessageHistory(); // Clear the message history of the whole room
+channel.SetState("TestVariable", 1234); // Set any variable defined in the Input section
+channel.ClearState(); // Clear all variables from the state
+channel.GenerateAnswer(); // Generate an answer without providing any input
+channel.ClearMessageHistory(); // Clear the message history of the whole channel
 ```
 
 ### Example Program

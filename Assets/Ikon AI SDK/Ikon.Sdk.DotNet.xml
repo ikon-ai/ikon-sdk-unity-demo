@@ -6,7 +6,7 @@
     <members>
         <member name="T:Ikon.Sdk.DotNet.IIkonClient">
             <summary>
-            IIkonClient represents one space and all the rooms in it.
+            IIkonClient represents one space and all the channels in it.
             </summary>
         </member>
         <member name="P:Ikon.Sdk.DotNet.IIkonClient.ClientInfo">
@@ -14,17 +14,17 @@
             ClientInfo that was used to create this client.
             </summary>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.IIkonClient.Rooms">
+        <member name="P:Ikon.Sdk.DotNet.IIkonClient.Channels">
             <summary>
-            All the rooms in the space.
+            All the channels in the space.
             </summary>
         </member>
-        <member name="M:Ikon.Sdk.DotNet.IIkonClient.GetRoomBySlug(System.String)">
+        <member name="M:Ikon.Sdk.DotNet.IIkonClient.GetChannelByKey(System.String)">
             <summary>
-            Get a room by its slug.
+            Get a channel by its key.
             </summary>
-            <param name="slug">Slug that is set for the room in the Portal</param>
-            <returns>IRoom instance</returns>
+            <param name="key">Key that is set for the channel in the Portal</param>
+            <returns>IChannel instance</returns>
         </member>
         <member name="T:Ikon.Sdk.DotNet.AsyncEventHandler`1">
             <summary>
@@ -52,82 +52,77 @@
             Protocol message that was received.
             </summary>
         </member>
-        <member name="T:Ikon.Sdk.DotNet.IRoom">
+        <member name="T:Ikon.Sdk.DotNet.IChannel">
             <summary>
-            IRoom represents a room in the space.
+            IChannel represents a channel in the space.
             </summary>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.IRoom.Id">
+        <member name="P:Ikon.Sdk.DotNet.IChannel.Key">
             <summary>
-            Unique identifier for the room.
+            Key that is set for the channel in the Portal.
             </summary>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.IRoom.Slug">
+        <member name="P:Ikon.Sdk.DotNet.IChannel.Title">
             <summary>
-            Slug that is set for the room in the Portal.
+            Title that is set for the channel in the Portal.
             </summary>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.IRoom.Title">
+        <member name="P:Ikon.Sdk.DotNet.IChannel.GlobalState">
             <summary>
-            Title that is set for the room in the Portal.
+            Global state that contains up-to-date information about the active clients and streams in the channel.
             </summary>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.IRoom.GlobalState">
+        <member name="M:Ikon.Sdk.DotNet.IChannel.ConnectAsync">
             <summary>
-            Global state that contains up-to-date information about the active clients and streams in the room.
+            Connect to the Ikon server instance and join the channel.
             </summary>
         </member>
-        <member name="M:Ikon.Sdk.DotNet.IRoom.ConnectAsync">
+        <member name="M:Ikon.Sdk.DotNet.IChannel.SignalReady">
             <summary>
-            Connect to the Ikon server instance and join the room.
+            Signal all other clients in the channel that this client is ready.
             </summary>
         </member>
-        <member name="M:Ikon.Sdk.DotNet.IRoom.SignalReady">
+        <member name="M:Ikon.Sdk.DotNet.IChannel.WaitForAIAgentAsync">
             <summary>
-            Signal all other clients in the room that this client is ready.
+            Wait for the AI agent client to connect to the channel and become ready.
             </summary>
         </member>
-        <member name="M:Ikon.Sdk.DotNet.IRoom.WaitForAIAgent">
+        <member name="E:Ikon.Sdk.DotNet.IChannel.Connecting">
             <summary>
-            Wait for the AI agent client to connect to the room and become ready.
+            Event that is triggered before connecting to the channel. Protocol messages cannot be sent or received at this point.
             </summary>
         </member>
-        <member name="E:Ikon.Sdk.DotNet.IRoom.Connecting">
+        <member name="E:Ikon.Sdk.DotNet.IChannel.Connected">
             <summary>
-            Event that is triggered before connecting to the room. Protocol messages cannot be sent or received at this point.
+            Event that is triggered after successfully connected to the channel. Protocol messages cannot be sent or received at this point.
             </summary>
         </member>
-        <member name="E:Ikon.Sdk.DotNet.IRoom.Connected">
+        <member name="E:Ikon.Sdk.DotNet.IChannel.Joined">
             <summary>
-            Event that is triggered after successfully connected to the room. Protocol messages cannot be sent or received at this point.
+            Event that is triggered after the connection has been authenticated and channel has been joined. Protocol messages can be sent and received at this point.
             </summary>
         </member>
-        <member name="E:Ikon.Sdk.DotNet.IRoom.Joined">
+        <member name="E:Ikon.Sdk.DotNet.IChannel.MessageReceived">
             <summary>
-            Event that is triggered after the connection has been authenticated and room has been joined. Protocol messages can be sent and received at this point.
+            Event that is triggered when a protocol message is received from the channel.
             </summary>
         </member>
-        <member name="E:Ikon.Sdk.DotNet.IRoom.MessageReceived">
+        <member name="E:Ikon.Sdk.DotNet.IChannel.Stopping">
             <summary>
-            Event that is triggered when a protocol message is received from the room.
+            Event that is triggered when the connection to the channel is about to be closed. Protocol messages can be sent or received at this point.
             </summary>
         </member>
-        <member name="E:Ikon.Sdk.DotNet.IRoom.Stopping">
+        <member name="E:Ikon.Sdk.DotNet.IChannel.Disconnected">
             <summary>
-            Event that is triggered when the connection to the room is about to be closed. Protocol messages can be sent or received at this point.
+            Event that is triggered after the connection to the channel has been closed. Protocol messages cannot be sent or received at this point.
             </summary>
         </member>
-        <member name="E:Ikon.Sdk.DotNet.IRoom.Disconnected">
+        <member name="T:Ikon.Sdk.DotNet.Channel">
             <summary>
-            Event that is triggered after the connection to the room has been closed. Protocol messages cannot be sent or received at this point.
+            An "easy-mode" class that simplifies the interaction with an IChannel instance.
             </summary>
         </member>
-        <member name="T:Ikon.Sdk.DotNet.Room">
-            <summary>
-            An "easy-mode" class that simplifies the interaction with an IRoom instance.
-            </summary>
-        </member>
-        <member name="M:Ikon.Sdk.DotNet.Room.RegisterFunction``2(System.String,System.Func{``0,System.Threading.Tasks.Task{``1}})">
+        <member name="M:Ikon.Sdk.DotNet.Channel.RegisterFunction``2(System.String,System.Func{``0,System.Threading.Tasks.Task{``1}})">
             <summary>
             Register a function that can be called from the LLM shader either as a template function or as a model function.
             </summary>
@@ -136,7 +131,7 @@
             <param name="name">Name of the function</param>
             <param name="callbackAsync">Callback function</param>
         </member>
-        <member name="M:Ikon.Sdk.DotNet.Room.RegisterFunction``3(System.String,System.Func{``0,``1,System.Threading.Tasks.Task{``2}})">
+        <member name="M:Ikon.Sdk.DotNet.Channel.RegisterFunction``3(System.String,System.Func{``0,``1,System.Threading.Tasks.Task{``2}})">
             <summary>
             Register a function that can be called from the LLM shader either as a template function or as a model function.
             </summary>
@@ -146,7 +141,7 @@
             <param name="name">Name of the function</param>
             <param name="callbackAsync">Callback function</param>
         </member>
-        <member name="M:Ikon.Sdk.DotNet.Room.RegisterFunction``4(System.String,System.Func{``0,``1,``2,System.Threading.Tasks.Task{``3}})">
+        <member name="M:Ikon.Sdk.DotNet.Channel.RegisterFunction``4(System.String,System.Func{``0,``1,``2,System.Threading.Tasks.Task{``3}})">
             <summary>
             Register a function that can be called from the LLM shader either as a template function or as a model function.
             </summary>
@@ -157,7 +152,7 @@
             <param name="name">Name of the function</param>
             <param name="callbackAsync">Callback function</param>
         </member>
-        <member name="M:Ikon.Sdk.DotNet.Room.RegisterFunction``5(System.String,System.Func{``0,``1,``2,``3,System.Threading.Tasks.Task{``4}})">
+        <member name="M:Ikon.Sdk.DotNet.Channel.RegisterFunction``5(System.String,System.Func{``0,``1,``2,``3,System.Threading.Tasks.Task{``4}})">
             <summary>
             Register a function that can be called from the LLM shader either as a template function or as a model function.
             </summary>
@@ -169,52 +164,52 @@
             <param name="name">Name of the function</param>
             <param name="callbackAsync">Callback function</param>
         </member>
-        <member name="T:Ikon.Sdk.DotNet.Room.ConnectedArgs">
+        <member name="T:Ikon.Sdk.DotNet.Channel.ConnectedArgs">
             <summary>
             Event arguments for Connected event.
             </summary>
         </member>
-        <member name="T:Ikon.Sdk.DotNet.Room.StoppingArgs">
+        <member name="T:Ikon.Sdk.DotNet.Channel.StoppingArgs">
             <summary>
             Event arguments for Stopping event.
             </summary>
         </member>
-        <member name="T:Ikon.Sdk.DotNet.Room.DisconnectedArgs">
+        <member name="T:Ikon.Sdk.DotNet.Channel.DisconnectedArgs">
             <summary>
             Event arguments for Disconnected event.
             </summary>
         </member>
-        <member name="T:Ikon.Sdk.DotNet.Room.TextArgs">
+        <member name="T:Ikon.Sdk.DotNet.Channel.TextArgs">
             <summary>
             Event arguments for Text event.
             </summary>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.Room.TextArgs.UserId">
+        <member name="P:Ikon.Sdk.DotNet.Channel.TextArgs.UserId">
             <summary>
             User ID of the sender.
             </summary>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.Room.TextArgs.UserName">
+        <member name="P:Ikon.Sdk.DotNet.Channel.TextArgs.UserName">
             <summary>
             Username of the sender.
             </summary>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.Room.TextArgs.Text">
+        <member name="P:Ikon.Sdk.DotNet.Channel.TextArgs.Text">
             <summary>
             Content of the message.
             </summary>
         </member>
-        <member name="T:Ikon.Sdk.DotNet.Room.AudioStreamBeginArgs">
+        <member name="T:Ikon.Sdk.DotNet.Channel.AudioStreamBeginArgs">
             <summary>
             Event arguments for AudioStreamBegin event.
             </summary>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.Room.AudioStreamBeginArgs.StreamId">
+        <member name="P:Ikon.Sdk.DotNet.Channel.AudioStreamBeginArgs.StreamId">
             <summary>
             Unique identifier of the audio stream.
             </summary>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.Room.AudioStreamBeginArgs.SampleRate">
+        <member name="P:Ikon.Sdk.DotNet.Channel.AudioStreamBeginArgs.SampleRate">
             <summary>
             Sample rate of the audio stream.
             </summary>
@@ -222,60 +217,60 @@
             Consumer of the event can override this value to change the sample rate of the incoming audio stream (conversion is done by the SDK).
             </remarks>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.Room.AudioStreamBeginArgs.Channels">
+        <member name="P:Ikon.Sdk.DotNet.Channel.AudioStreamBeginArgs.Channels">
             <summary>
             Number of channels in the audio stream.
             </summary>
         </member>
-        <member name="T:Ikon.Sdk.DotNet.Room.AudioFrameArgs">
+        <member name="T:Ikon.Sdk.DotNet.Channel.AudioFrameArgs">
             <summary>
             Event arguments for AudioFrame event.
             </summary>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.Room.AudioFrameArgs.StreamId">
+        <member name="P:Ikon.Sdk.DotNet.Channel.AudioFrameArgs.StreamId">
             <summary>
             Unique identifier of the audio stream.
             </summary>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.Room.AudioFrameArgs.Samples">
+        <member name="P:Ikon.Sdk.DotNet.Channel.AudioFrameArgs.Samples">
             <summary>
             Audio samples in float format.
             </summary>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.Room.AudioFrameArgs.IsFirst">
+        <member name="P:Ikon.Sdk.DotNet.Channel.AudioFrameArgs.IsFirst">
             <summary>
             Signals, for example, the beginning of a recorded sentence.
             </summary>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.Room.AudioFrameArgs.IsLast">
+        <member name="P:Ikon.Sdk.DotNet.Channel.AudioFrameArgs.IsLast">
             <summary>
             Signals, for example, the end of a recorded sentence.
             </summary>
         </member>
-        <member name="T:Ikon.Sdk.DotNet.Room.AudioStreamEndArgs">
+        <member name="T:Ikon.Sdk.DotNet.Channel.AudioStreamEndArgs">
             <summary>
             Event arguments for AudioStreamEnd event.
             </summary>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.Room.AudioStreamEndArgs.StreamId">
+        <member name="P:Ikon.Sdk.DotNet.Channel.AudioStreamEndArgs.StreamId">
             <summary>
             Unique identifier of the audio stream.
             </summary>
         </member>
-        <member name="E:Ikon.Sdk.DotNet.Room.Connected">
+        <member name="E:Ikon.Sdk.DotNet.Channel.Connected">
             <summary>
-            Event that is triggered after the room has been successfully connected and joined.
+            Event that is triggered after the channel has been successfully connected and joined.
             </summary>
         </member>
-        <member name="E:Ikon.Sdk.DotNet.Room.Stopping">
+        <member name="E:Ikon.Sdk.DotNet.Channel.Stopping">
             <summary>
-            Event that is triggered before leaving the room.
+            Event that is triggered before leaving the channel.
             </summary>
             <remarks>
             Messages can still be sent in this event.
             </remarks>
         </member>
-        <member name="E:Ikon.Sdk.DotNet.Room.Disconnected">
+        <member name="E:Ikon.Sdk.DotNet.Channel.Disconnected">
             <summary>
             Event that is triggered after the connection has been closed.
             </summary>
@@ -283,70 +278,70 @@
             Nothing can be sent or received in or after this event.
             </remarks>
         </member>
-        <member name="E:Ikon.Sdk.DotNet.Room.Text">
+        <member name="E:Ikon.Sdk.DotNet.Channel.Text">
             <summary>
             Event that is triggered when a text message is received.
             </summary>
         </member>
-        <member name="E:Ikon.Sdk.DotNet.Room.AudioStreamBegin">
+        <member name="E:Ikon.Sdk.DotNet.Channel.AudioStreamBegin">
             <summary>
             Event that is triggered when an audio stream begins.
             </summary>
         </member>
-        <member name="E:Ikon.Sdk.DotNet.Room.AudioFrame">
+        <member name="E:Ikon.Sdk.DotNet.Channel.AudioFrame">
             <summary>
             Event that is triggered when an audio frame is received.
             </summary>
         </member>
-        <member name="E:Ikon.Sdk.DotNet.Room.AudioStreamEnd">
+        <member name="E:Ikon.Sdk.DotNet.Channel.AudioStreamEnd">
             <summary>
             Event that is triggered when an audio stream ends.
             </summary>
         </member>
-        <member name="M:Ikon.Sdk.DotNet.Room.#ctor(Ikon.Sdk.DotNet.IIkonClient,System.String)">
+        <member name="M:Ikon.Sdk.DotNet.Channel.#ctor(Ikon.Sdk.DotNet.IIkonClient,System.String)">
             <summary>
-            Create a new Room instance.
+            Create a new Channel instance.
             </summary>
             <param name="ikonClient">IkonClient instance</param>
-            <param name="slug">Slug that is set for the room in the Portal</param>
+            <param name="key">Key that is set for the channel in the Portal</param>
         </member>
-        <member name="M:Ikon.Sdk.DotNet.Room.#ctor(Ikon.Sdk.DotNet.IIkonClient,Ikon.Sdk.DotNet.IRoom)">
+        <member name="M:Ikon.Sdk.DotNet.Channel.#ctor(Ikon.Sdk.DotNet.IIkonClient,Ikon.Sdk.DotNet.IChannel)">
             <summary>
-            Create a new Room instance.
+            Create a new Channel instance.
             </summary>
             <param name="ikonClient">IkonClient instance</param>
-            <param name="room">IRoom instance</param>
+            <param name="channel">IChannel instance</param>
         </member>
-        <member name="M:Ikon.Sdk.DotNet.Room.Dispose">
+        <member name="M:Ikon.Sdk.DotNet.Channel.Dispose">
             <summary>
-            Dispose the Room instance.
+            Dispose the Channel instance.
             </summary>
         </member>
-        <member name="M:Ikon.Sdk.DotNet.Room.ConnectAsync">
+        <member name="M:Ikon.Sdk.DotNet.Channel.ConnectAsync">
             <summary>
-            Connect to the Ikon server instance and join the room.
+            Connect to the Ikon server (channel).
             </summary>
         </member>
-        <member name="M:Ikon.Sdk.DotNet.Room.SignalReady">
+        <member name="M:Ikon.Sdk.DotNet.Channel.SignalReady">
             <summary>
-            Signal all other clients in the room that this client is ready.
+            Signal all other clients in the channel that this client is ready.
             </summary>
         </member>
-        <member name="M:Ikon.Sdk.DotNet.Room.WaitForAIAgent">
+        <member name="M:Ikon.Sdk.DotNet.Channel.WaitForAIAgentAsync">
             <summary>
-            Wait for the AI agent client to connect to the room and become ready.
+            Wait for the AI agent client to connect to the channel and become ready.
             </summary>
         </member>
-        <member name="M:Ikon.Sdk.DotNet.Room.SendText(System.String,System.Boolean,System.Boolean,System.Nullable{System.DateTime})">
+        <member name="M:Ikon.Sdk.DotNet.Channel.SendText(System.String,System.Boolean,System.Boolean,System.Nullable{System.DateTime})">
             <summary>
-            Send a text message to the room.
+            Send a text message to the channel.
             </summary>
             <param name="text">Text to be sent</param>
             <param name="generateChatMessage">Whether to generate UI messages to the chat UI stream</param>
             <param name="sendBackToSender">Whether to route the message also back to the sender</param>
             <param name="createdAt">Timestamp for the message. If left empty, server will set its own time to it at receive</param>
         </member>
-        <member name="M:Ikon.Sdk.DotNet.Room.SetState(System.String,System.Object)">
+        <member name="M:Ikon.Sdk.DotNet.Channel.SetState(System.String,System.Object)">
             <summary>
             Set the LLM shader state variable to the given value.
             </summary>
@@ -356,7 +351,7 @@
             Only variables defined in the LLM shader Input section can be set.
             </remarks>
         </member>
-        <member name="M:Ikon.Sdk.DotNet.Room.ClearState">
+        <member name="M:Ikon.Sdk.DotNet.Channel.ClearState">
             <summary>
             Clear the LLM shader state.
             </summary>
@@ -364,19 +359,19 @@
             State will be reset to be identical to the Input section of the LLM shader.
             </remarks>
         </member>
-        <member name="M:Ikon.Sdk.DotNet.Room.GenerateAnswer">
+        <member name="M:Ikon.Sdk.DotNet.Channel.GenerateAnswer">
             <summary>
             Trigger the generation of an answer by the AI agent without sending any input.
             </summary>
         </member>
-        <member name="M:Ikon.Sdk.DotNet.Room.ClearMessageHistory">
+        <member name="M:Ikon.Sdk.DotNet.Channel.ClearMessageHistory">
             <summary>
-            Clear the whole message history of the room.
+            Clear the whole message history of the channel.
             </summary>
         </member>
-        <member name="M:Ikon.Sdk.DotNet.Room.SendAudio(System.Memory{System.Single},System.Int32,System.Int32,System.Boolean,System.Boolean,System.String)">
+        <member name="M:Ikon.Sdk.DotNet.Channel.SendAudio(System.Memory{System.Single},System.Int32,System.Int32,System.Boolean,System.Boolean,System.String)">
             <summary>
-            Send audio to the room.
+            Send audio to the channel.
             </summary>
             <param name="samples">Arbitrary length array of floating point audio samples</param>
             <param name="sampleRate">Sample rate of the audio</param>
@@ -532,10 +527,10 @@
             <returns>IkonClient instance</returns>
         </member>
         <member name="T:Ikon.Sdk.DotNet.Version">
-            <summary> /// Version class /// </summary>
+            <summary>Version class</summary>
         </member>
         <member name="F:Ikon.Sdk.DotNet.Version.VersionString">
-            <summary> /// Version string for the library /// </summary>
+            <summary>Version string for the library</summary>
         </member>
     </members>
 </doc>
