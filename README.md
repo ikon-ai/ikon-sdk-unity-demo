@@ -18,6 +18,7 @@ Welcome to the Ikon AI SDK Unity Example. This project is designed to show how t
 - Open `Assets/SceneHandler.cs` file and set the correct API key, space ID, and user ID (either in code or in environment variables)
 - **Note:** If modifying environment variables, it might be necessary to completely logout and login again to get them to update in the Unity Editor
 - Press play to run the project
+- **Note:** If using the IL2CPP backend, the `Managed Stripping Level` must be set to `Minimal`
 
 ## License
 

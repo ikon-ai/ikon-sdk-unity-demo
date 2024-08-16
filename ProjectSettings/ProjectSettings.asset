@@ -162,6 +162,7 @@ PlayerSettings:
   androidMaxAspectRatio: 2.1
   applicationIdentifier:
     Android: com.IkonAI.IkonAISDKDemo
+    Standalone: com.Ikon-AI.Ikon-AI-SDK-Demo
     iPhone: com.Ikon-AI.Ikon-AI-SDK-Demo
   buildNumber:
     Standalone: 0
@@ -505,7 +506,7 @@ PlayerSettings:
   enableCrashReportAPI: 0
   cameraUsageDescription: 
   locationUsageDescription: 
-  microphoneUsageDescription: 
+  microphoneUsageDescription: Voice recording
   bluetoothUsageDescription: 
   macOSTargetOSVersion: 10.13.0
   switchNMETAOverride: 
@@ -759,6 +760,8 @@ PlayerSettings:
   platformArchitecture: {}
   scriptingBackend:
     Android: 1
+    Server: 1
+    Standalone: 1
   il2cppCompilerConfiguration: {}
   il2cppCodeGeneration: {}
   managedStrippingLevel:
@@ -770,11 +773,12 @@ PlayerSettings:
     PS5: 1
     QNX: 1
     Stadia: 1
+    Standalone: 4
     VisionOS: 1
     WebGL: 1
     Windows Store Apps: 1
     XboxOne: 1
-    iPhone: 1
+    iPhone: 4
     tvOS: 1
   incrementalIl2cppBuild: {}
   suppressCommonWarnings: 1
