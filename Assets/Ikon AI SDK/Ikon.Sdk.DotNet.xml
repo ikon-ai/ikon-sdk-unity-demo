@@ -466,7 +466,22 @@
         </member>
         <member name="P:Ikon.Sdk.DotNet.Sdk.ClientInfo.BackendRequestTimeout">
             <summary>
-            Default timeout for backend HTTP requests in seconds.
+            Default timeout for backend requests in seconds.
+            </summary>
+        </member>
+        <member name="P:Ikon.Sdk.DotNet.Sdk.ClientInfo.BackendChannelConnectTimeout">
+            <summary>
+            Default timeout for channel connect in seconds (backend).
+            </summary>
+        </member>
+        <member name="P:Ikon.Sdk.DotNet.Sdk.ClientInfo.ServerChannelConnectTimeout">
+            <summary>
+            Default timeout for channel connect in seconds (server).
+            </summary>
+        </member>
+        <member name="P:Ikon.Sdk.DotNet.Sdk.ClientInfo.IsReadyTimeout">
+            <summary>
+            Default timeout for calling the SignalReady method in seconds.
             </summary>
         </member>
         <member name="P:Ikon.Sdk.DotNet.Sdk.ClientInfo.UseProductionEndpoint">
