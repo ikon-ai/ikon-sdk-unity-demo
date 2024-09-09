@@ -247,12 +247,27 @@
             Signals, for example, the end of a recorded sentence.
             </summary>
         </member>
+        <member name="P:Ikon.Sdk.DotNet.Channel.AudioFrameArgs.TotalLengthSinceIsFirst">
+            <summary>
+            Total current lenght of the current audio snippet since IsFirst was set to true.
+            </summary>
+        </member>
         <member name="T:Ikon.Sdk.DotNet.Channel.AudioStreamEndArgs">
             <summary>
             Event arguments for AudioStreamEnd event.
             </summary>
         </member>
         <member name="P:Ikon.Sdk.DotNet.Channel.AudioStreamEndArgs.StreamId">
+            <summary>
+            Unique identifier of the audio stream.
+            </summary>
+        </member>
+        <member name="T:Ikon.Sdk.DotNet.Channel.ClassificationResultArgs">
+            <summary>
+            Event arguments for AudioStreamEnd event.
+            </summary>
+        </member>
+        <member name="F:Ikon.Sdk.DotNet.Channel.ClassificationResultArgs.Result">
             <summary>
             Unique identifier of the audio stream.
             </summary>
@@ -296,6 +311,11 @@
         <member name="E:Ikon.Sdk.DotNet.Channel.AudioStreamEnd">
             <summary>
             Event that is triggered when an audio stream ends.
+            </summary>
+        </member>
+        <member name="E:Ikon.Sdk.DotNet.Channel.ClassificationResult">
+            <summary>
+            Event that is triggered as soon as when classification result is available.
             </summary>
         </member>
         <member name="M:Ikon.Sdk.DotNet.Channel.#ctor(Ikon.Sdk.DotNet.IIkonClient,System.String)">
@@ -462,6 +482,11 @@
         <member name="P:Ikon.Sdk.DotNet.Sdk.ClientInfo.OpcodeGroupsToServer">
             <summary>
             Opcode groups that the client wants to send to the server.
+            </summary>
+        </member>
+        <member name="P:Ikon.Sdk.DotNet.Sdk.ClientInfo.HasInput">
+            <summary>
+            Whether to client is going to send input immediately to the server after connecting (automatic answer generation at connect will be disabled).
             </summary>
         </member>
         <member name="P:Ikon.Sdk.DotNet.Sdk.ClientInfo.BackendRequestTimeout">
