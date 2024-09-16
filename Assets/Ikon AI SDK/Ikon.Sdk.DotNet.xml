@@ -199,6 +199,26 @@
             Content of the message.
             </summary>
         </member>
+        <member name="T:Ikon.Sdk.DotNet.Channel.AudioStreamingMode">
+            <summary>
+            Determines whether the audio is streamed as normal or if it should be delayed until the total duration is known or until the last frame is received.
+            </summary>
+        </member>
+        <member name="F:Ikon.Sdk.DotNet.Channel.AudioStreamingMode.Streaming">
+            <summary>
+            Audio is streamed as normal. Events are raised as soon as the new audio packet arrives and is decoded.
+            </summary>
+        </member>
+        <member name="F:Ikon.Sdk.DotNet.Channel.AudioStreamingMode.DelayUntilTotalDurationKnown">
+            <summary>
+            Delays the audio events for the stream, until the total duration is known. The subsequent frames are then streamed as normal.
+            </summary>
+        </member>
+        <member name="F:Ikon.Sdk.DotNet.Channel.AudioStreamingMode.DelayUntilIsLast">
+            <summary>
+            Delays the audio events for the stream, until the last frame is received. All the frames are then streamed at once without delays in between.
+            </summary>
+        </member>
         <member name="T:Ikon.Sdk.DotNet.Channel.AudioStreamBeginArgs">
             <summary>
             Event arguments for AudioStreamBegin event.
@@ -220,6 +240,11 @@
         <member name="P:Ikon.Sdk.DotNet.Channel.AudioStreamBeginArgs.Channels">
             <summary>
             Number of channels in the audio stream.
+            </summary>
+        </member>
+        <member name="P:Ikon.Sdk.DotNet.Channel.AudioStreamBeginArgs.StreamingMode">
+            <summary>
+            Streaming mode of the audio to provide a way to delay the stream until the total duration is known or until the last frame is received.
             </summary>
         </member>
         <member name="T:Ikon.Sdk.DotNet.Channel.AudioFrameArgs">
@@ -247,9 +272,14 @@
             Signals, for example, the end of a recorded sentence.
             </summary>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.Channel.AudioFrameArgs.TotalLengthSinceIsFirst">
+        <member name="P:Ikon.Sdk.DotNet.Channel.AudioFrameArgs.DurationSinceIsFirst">
             <summary>
-            Total current lenght of the current audio snippet since IsFirst was set to true.
+            Total current length of the current audio snippet since IsFirst was set to true.
+            </summary>
+        </member>
+        <member name="P:Ikon.Sdk.DotNet.Channel.AudioFrameArgs.TotalDuration">
+            <summary>
+            Full expected length of the audio being streamed, or 0 if the full length is still unknown.
             </summary>
         </member>
         <member name="T:Ikon.Sdk.DotNet.Channel.AudioStreamEndArgs">
