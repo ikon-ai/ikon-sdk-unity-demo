@@ -1,0 +1,73 @@
+name: Build
+
+on:
+  #push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        platform:
+        - { os: ubuntu-latest-8C-32GB, name: "Build All", short_name: "all", }
+    runs-on: ${{ matrix.platform.os }}
+    name: ${{ matrix.platform.name }}
+    concurrency: unity-builder
+    defaults:
+      run:
+        shell: bash
+    permissions:
+      contents: "write"
+      id-token: "write"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ikon-sdk-unity-demo
+          lfs: true
+          fetch-depth: 0
+          submodules: recursive
+          token: ${{ secrets.IKON_MACHINE_USER_ACCESS_TOKEN }}
+
+      - name: Get variables
+        id: variables
+        run: |
+          cd ikon-sdk-unity-demo
+          echo "unity_version=$(./builder unity_version)" >> $GITHUB_OUTPUT
+          echo "uid_gid=$(id -u):$(id -g)" >> $GITHUB_OUTPUT
+
+      - name: Cache Unity library
+        uses: actions/cache@v3
+        with:
+          path: ikon-sdk-unity-demo/Library
+          key: Library-${{ steps.variables.outputs.unity_version }}
+
+      - name: Build Windows
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_EMAIL: ${{ secrets.IKON_UNITY_PRO_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.IKON_UNITY_PRO_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.IKON_UNITY_PRO_SERIAL }}
+        with:
+          projectPath: ikon-sdk-unity-demo
+          targetPlatform: StandaloneWindows64
+      
+      - name: Build Android
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_EMAIL: ${{ secrets.IKON_UNITY_PRO_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.IKON_UNITY_PRO_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.IKON_UNITY_PRO_SERIAL }}
+        with:
+          projectPath: ikon-sdk-unity-demo
+          targetPlatform: Android
+      
+      - name: Build iOS
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_EMAIL: ${{ secrets.IKON_UNITY_PRO_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.IKON_UNITY_PRO_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.IKON_UNITY_PRO_SERIAL }}
+        with:
+          projectPath: ikon-sdk-unity-demo
+          targetPlatform: iOS

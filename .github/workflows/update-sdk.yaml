@@ -1,0 +1,25 @@
+name: Update SDK
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-sdk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Update SDK
+        run: |
+          ./builder update_sdk --github-access-token ${{ secrets.IKON_MACHINE_USER_ACCESS_TOKEN_PUBLIC_ONLY }}
+          git config user.name "Ikon Machine User"
+          git config user.email "admin@ikon.live"
+          git commit -am "Update Ikon SDK to the latest official release"
+          git push
