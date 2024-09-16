@@ -1,7 +1,7 @@
 name: Build
 
 on:
-  #push:
+  push:
   workflow_dispatch:
 
 jobs:
@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         platform:
-        - { os: ubuntu-latest-8C-32GB, name: "Build All", short_name: "all", }
+        - { os: ubuntu-latest-8C-32GB, name: "Build Linux", short_name: "linux", }
     runs-on: ${{ matrix.platform.os }}
     name: ${{ matrix.platform.name }}
     concurrency: unity-builder
@@ -27,7 +27,7 @@ jobs:
           lfs: true
           fetch-depth: 0
           submodules: recursive
-          token: ${{ secrets.IKON_MACHINE_USER_ACCESS_TOKEN }}
+          token: ${{ secrets.IKON_MACHINE_USER_ACCESS_TOKEN_PUBLIC_ONLY }}
 
       - name: Get variables
         id: variables
@@ -42,7 +42,7 @@ jobs:
           path: ikon-sdk-unity-demo/Library
           key: Library-${{ steps.variables.outputs.unity_version }}
 
-      - name: Build Windows
+      - name: Build Linux
         uses: game-ci/unity-builder@v4
         env:
           UNITY_EMAIL: ${{ secrets.IKON_UNITY_PRO_EMAIL }}
@@ -50,24 +50,4 @@ jobs:
           UNITY_SERIAL: ${{ secrets.IKON_UNITY_PRO_SERIAL }}
         with:
           projectPath: ikon-sdk-unity-demo
-          targetPlatform: StandaloneWindows64
-      
-      - name: Build Android
-        uses: game-ci/unity-builder@v4
-        env:
-          UNITY_EMAIL: ${{ secrets.IKON_UNITY_PRO_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.IKON_UNITY_PRO_PASSWORD }}
-          UNITY_SERIAL: ${{ secrets.IKON_UNITY_PRO_SERIAL }}
-        with:
-          projectPath: ikon-sdk-unity-demo
-          targetPlatform: Android
-      
-      - name: Build iOS
-        uses: game-ci/unity-builder@v4
-        env:
-          UNITY_EMAIL: ${{ secrets.IKON_UNITY_PRO_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.IKON_UNITY_PRO_PASSWORD }}
-          UNITY_SERIAL: ${{ secrets.IKON_UNITY_PRO_SERIAL }}
-        with:
-          projectPath: ikon-sdk-unity-demo
-          targetPlatform: iOS
+          targetPlatform: StandaloneLinux64
