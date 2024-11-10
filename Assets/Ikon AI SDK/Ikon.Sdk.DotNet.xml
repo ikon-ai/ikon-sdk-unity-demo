@@ -9,9 +9,9 @@
             IIkonClient represents one space and all the channels in it.
             </summary>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.IIkonClient.ClientInfo">
+        <member name="P:Ikon.Sdk.DotNet.IIkonClient.IkonClientInfo">
             <summary>
-            ClientInfo that was used to create this client.
+            IkonClientInfo that was used to create this client.
             </summary>
         </member>
         <member name="P:Ikon.Sdk.DotNet.IIkonClient.Channels">
@@ -199,6 +199,46 @@
             Content of the message.
             </summary>
         </member>
+        <member name="T:Ikon.Sdk.DotNet.Channel.ClassificationResultArgs">
+            <summary>
+            Event arguments for ClassificationResult event.
+            </summary>
+        </member>
+        <member name="F:Ikon.Sdk.DotNet.Channel.ClassificationResultArgs.Result">
+            <summary>
+            The classification result.
+            </summary>
+        </member>
+        <member name="T:Ikon.Sdk.DotNet.Channel.SpecialLogArgs">
+            <summary>
+            Event arguments for SpecialLog event.
+            </summary>
+        </member>
+        <member name="P:Ikon.Sdk.DotNet.Channel.SpecialLogArgs.Title">
+            <summary>
+            Title of the special log.
+            </summary>
+        </member>
+        <member name="P:Ikon.Sdk.DotNet.Channel.SpecialLogArgs.Message">
+            <summary>
+            Message of the special log.
+            </summary>
+        </member>
+        <member name="T:Ikon.Sdk.DotNet.Channel.UsageArgs">
+            <summary>
+            Event arguments for Usage event.
+            </summary>
+        </member>
+        <member name="P:Ikon.Sdk.DotNet.Channel.UsageArgs.UsageName">
+            <summary>
+            Name of the usage.
+            </summary>
+        </member>
+        <member name="P:Ikon.Sdk.DotNet.Channel.UsageArgs.Usage">
+            <summary>
+            The usage amount.
+            </summary>
+        </member>
         <member name="T:Ikon.Sdk.DotNet.Channel.AudioStreamingMode">
             <summary>
             Determines whether the audio is streamed as normal or if it should be delayed until the total duration is known or until the last frame is received.
@@ -274,7 +314,7 @@
         </member>
         <member name="P:Ikon.Sdk.DotNet.Channel.AudioFrameArgs.DurationSinceIsFirst">
             <summary>
-            Total current length of the current audio snippet since IsFirst was set to true.
+            Length of the current audio snippet since IsFirst was set to true.
             </summary>
         </member>
         <member name="P:Ikon.Sdk.DotNet.Channel.AudioFrameArgs.TotalDuration">
@@ -288,16 +328,6 @@
             </summary>
         </member>
         <member name="P:Ikon.Sdk.DotNet.Channel.AudioStreamEndArgs.StreamId">
-            <summary>
-            Unique identifier of the audio stream.
-            </summary>
-        </member>
-        <member name="T:Ikon.Sdk.DotNet.Channel.ClassificationResultArgs">
-            <summary>
-            Event arguments for AudioStreamEnd event.
-            </summary>
-        </member>
-        <member name="F:Ikon.Sdk.DotNet.Channel.ClassificationResultArgs.Result">
             <summary>
             Unique identifier of the audio stream.
             </summary>
@@ -328,6 +358,21 @@
             Event that is triggered when a text message is received.
             </summary>
         </member>
+        <member name="E:Ikon.Sdk.DotNet.Channel.ClassificationResult">
+            <summary>
+            Event that is triggered as soon as when classification result is available.
+            </summary>
+        </member>
+        <member name="E:Ikon.Sdk.DotNet.Channel.SpecialLog">
+            <summary>
+            Event that is triggered when a special log message is received.
+            </summary>
+        </member>
+        <member name="E:Ikon.Sdk.DotNet.Channel.Usage">
+            <summary>
+            Event that is triggered when usage information is available.
+            </summary>
+        </member>
         <member name="E:Ikon.Sdk.DotNet.Channel.AudioStreamBegin">
             <summary>
             Event that is triggered when an audio stream begins.
@@ -343,29 +388,12 @@
             Event that is triggered when an audio stream ends.
             </summary>
         </member>
-        <member name="E:Ikon.Sdk.DotNet.Channel.ClassificationResult">
-            <summary>
-            Event that is triggered as soon as when classification result is available.
-            </summary>
-        </member>
-        <member name="M:Ikon.Sdk.DotNet.Channel.#ctor(Ikon.Sdk.DotNet.IIkonClient,System.String)">
+        <member name="M:Ikon.Sdk.DotNet.Channel.Create(Ikon.Sdk.DotNet.IIkonClient,System.String)">
             <summary>
             Create a new Channel instance.
             </summary>
             <param name="ikonClient">IkonClient instance</param>
             <param name="key">Key that is set for the channel in the Portal</param>
-        </member>
-        <member name="M:Ikon.Sdk.DotNet.Channel.#ctor(Ikon.Sdk.DotNet.IIkonClient,Ikon.Sdk.DotNet.IChannel)">
-            <summary>
-            Create a new Channel instance.
-            </summary>
-            <param name="ikonClient">IkonClient instance</param>
-            <param name="channel">IChannel instance</param>
-        </member>
-        <member name="M:Ikon.Sdk.DotNet.Channel.Dispose">
-            <summary>
-            Dispose the Channel instance.
-            </summary>
         </member>
         <member name="M:Ikon.Sdk.DotNet.Channel.ConnectAsync">
             <summary>
@@ -419,6 +447,11 @@
             Clear the whole message history of the channel.
             </summary>
         </member>
+        <member name="M:Ikon.Sdk.DotNet.Channel.FadeoutAudio(System.Single)">
+            <summary>
+            Sends a signal to the server to fadeout audio streams being generated.
+            </summary>
+        </member>
         <member name="M:Ikon.Sdk.DotNet.Channel.SendAudio(System.Memory{System.Single},System.Int32,System.Int32,System.Boolean,System.Boolean,System.String)">
             <summary>
             Send audio to the channel.
@@ -441,62 +474,62 @@
             Ikon AI C# SDK.
             </summary>
         </member>
-        <member name="T:Ikon.Sdk.DotNet.Sdk.ClientInfo">
+        <member name="T:Ikon.Sdk.DotNet.Sdk.IkonClientInfo">
             <summary>
             Information about the client that is going to connect to a space.
             </summary>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.Sdk.ClientInfo.ApiKey">
+        <member name="P:Ikon.Sdk.DotNet.Sdk.IkonClientInfo.ApiKey">
             <summary>
             API key for the space. Get this from the Portal.
             </summary>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.Sdk.ClientInfo.SpaceId">
+        <member name="P:Ikon.Sdk.DotNet.Sdk.IkonClientInfo.SpaceId">
             <summary>
             Space ID. Get this from the Portal.
             </summary>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.Sdk.ClientInfo.UserId">
+        <member name="P:Ikon.Sdk.DotNet.Sdk.IkonClientInfo.UserId">
             <summary>
             User ID. This can be an arbitrary string given by you.
             </summary>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.Sdk.ClientInfo.Description">
+        <member name="P:Ikon.Sdk.DotNet.Sdk.IkonClientInfo.Description">
             <summary>
             Short description of the client.
             </summary>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.Sdk.ClientInfo.DeviceId">
+        <member name="P:Ikon.Sdk.DotNet.Sdk.IkonClientInfo.DeviceId">
             <summary>
             Unique device ID of the connecting device.
             </summary>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.Sdk.ClientInfo.ProductId">
+        <member name="P:Ikon.Sdk.DotNet.Sdk.IkonClientInfo.ProductId">
             <summary>
             Product code of the client.
             </summary>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.Sdk.ClientInfo.VersionId">
+        <member name="P:Ikon.Sdk.DotNet.Sdk.IkonClientInfo.VersionId">
             <summary>
             Version ID of the client.
             </summary>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.Sdk.ClientInfo.InstallId">
+        <member name="P:Ikon.Sdk.DotNet.Sdk.IkonClientInfo.InstallId">
             <summary>
             Install ID of the client.
             </summary>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.Sdk.ClientInfo.Locale">
+        <member name="P:Ikon.Sdk.DotNet.Sdk.IkonClientInfo.Locale">
             <summary>
             Locale of the client.
             </summary>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.Sdk.ClientInfo.UserType">
+        <member name="P:Ikon.Sdk.DotNet.Sdk.IkonClientInfo.UserType">
             <summary>
             User type of the client.
             </summary>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.Sdk.ClientInfo.PayloadType">
+        <member name="P:Ikon.Sdk.DotNet.Sdk.IkonClientInfo.PayloadType">
             <summary>
             Payload type of the protocol messages for the client.
             </summary>
@@ -504,47 +537,47 @@
             This is for now a process wide shared setting. Only the last set value is used.
             </remarks>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.Sdk.ClientInfo.OpcodeGroupsFromServer">
+        <member name="P:Ikon.Sdk.DotNet.Sdk.IkonClientInfo.OpcodeGroupsFromServer">
             <summary>
             Opcode groups that the client wants to receive from the server.
             </summary>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.Sdk.ClientInfo.OpcodeGroupsToServer">
+        <member name="P:Ikon.Sdk.DotNet.Sdk.IkonClientInfo.OpcodeGroupsToServer">
             <summary>
             Opcode groups that the client wants to send to the server.
             </summary>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.Sdk.ClientInfo.HasInput">
+        <member name="P:Ikon.Sdk.DotNet.Sdk.IkonClientInfo.HasInput">
             <summary>
             Whether to client is going to send input immediately to the server after connecting (automatic answer generation at connect will be disabled).
             </summary>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.Sdk.ClientInfo.BackendRequestTimeout">
+        <member name="P:Ikon.Sdk.DotNet.Sdk.IkonClientInfo.BackendRequestTimeout">
             <summary>
             Default timeout for backend requests in seconds.
             </summary>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.Sdk.ClientInfo.BackendChannelConnectTimeout">
+        <member name="P:Ikon.Sdk.DotNet.Sdk.IkonClientInfo.BackendChannelConnectTimeout">
             <summary>
             Default timeout for channel connect in seconds (backend).
             </summary>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.Sdk.ClientInfo.ServerChannelConnectTimeout">
+        <member name="P:Ikon.Sdk.DotNet.Sdk.IkonClientInfo.ServerChannelConnectTimeout">
             <summary>
             Default timeout for channel connect in seconds (server).
             </summary>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.Sdk.ClientInfo.IsReadyTimeout">
+        <member name="P:Ikon.Sdk.DotNet.Sdk.IkonClientInfo.IsReadyTimeout">
             <summary>
             Default timeout for calling the SignalReady method in seconds.
             </summary>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.Sdk.ClientInfo.UseProductionEndpoint">
+        <member name="P:Ikon.Sdk.DotNet.Sdk.IkonClientInfo.UseProductionEndpoint">
             <summary>
             Whether to use the backend production endpoint or the development endpoint.
             </summary>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.Sdk.ClientInfo.EnableServerLogRendering">
+        <member name="P:Ikon.Sdk.DotNet.Sdk.IkonClientInfo.EnableServerLogRendering">
             <summary>
             Whether to enable Ikon server log rendering at the client.
             </summary>
@@ -552,12 +585,12 @@
             Works only in development environment.
             </remarks>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.Sdk.ClientInfo.LogAllBackendRequests">
+        <member name="P:Ikon.Sdk.DotNet.Sdk.IkonClientInfo.LogAllBackendRequests">
             <summary>
             Whether to log all backend HTTP requests.
             </summary>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.Sdk.ClientInfo.UseLocalIkonServer">
+        <member name="P:Ikon.Sdk.DotNet.Sdk.IkonClientInfo.UseLocalIkonServer">
             <summary>
             Whether to use the local Ikon server.
             </summary>
@@ -565,7 +598,7 @@
             For internal testing purposes only.
             </remarks>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.Sdk.ClientInfo.LocalIkonServerHost">
+        <member name="P:Ikon.Sdk.DotNet.Sdk.IkonClientInfo.LocalIkonServerHost">
             <summary>
             Host of the local Ikon server.
             </summary>
@@ -573,7 +606,7 @@
             For internal testing purposes only.
             </remarks>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.Sdk.ClientInfo.LocalIkonServerPort">
+        <member name="P:Ikon.Sdk.DotNet.Sdk.IkonClientInfo.LocalIkonServerPort">
             <summary>
             Port of the local Ikon server.
             </summary>
@@ -581,7 +614,7 @@
             For internal testing purposes only.
             </remarks>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.Sdk.ClientInfo.LocalIkonServerUserId">
+        <member name="P:Ikon.Sdk.DotNet.Sdk.IkonClientInfo.LocalIkonServerUserId">
             <summary>
             Override user ID for the local Ikon server.
             </summary>
@@ -589,11 +622,11 @@
             For internal testing purposes only.
             </remarks>
         </member>
-        <member name="M:Ikon.Sdk.DotNet.Sdk.CreateIkonClientAsync(Ikon.Sdk.DotNet.Sdk.ClientInfo)">
+        <member name="M:Ikon.Sdk.DotNet.Sdk.CreateIkonClientAsync(Ikon.Sdk.DotNet.Sdk.IkonClientInfo)">
             <summary>
             Create a new IkonClient instance that connects to the given space.
             </summary>
-            <param name="clientInfo">Client info</param>
+            <param name="ikonClientInfo">IkonClient info</param>
             <returns>IkonClient instance</returns>
         </member>
         <member name="T:Ikon.Sdk.DotNet.Version">

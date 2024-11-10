@@ -54,7 +54,7 @@ public class SceneHandler : MonoBehaviour
         SendButtonHandler.PressStart += OnSendButtonPressStart;
         SendButtonHandler.PressStop += OnSendButtonPressStop;
 
-        var clientInfo = new Sdk.ClientInfo
+        var ikonClientInfo = new Sdk.IkonClientInfo
         {
             // Get the API key from the Ikon Portal and then supply it with e.g. environment variable. Do not hardcode it.
             ApiKey = Environment.GetEnvironmentVariable("IKON_SDK_API_KEY") ??
@@ -77,15 +77,15 @@ public class SceneHandler : MonoBehaviour
             InstallId = "1",
             UserType = UserType.Human,
             OpcodeGroupsFromServer = Opcode.GROUP_ALL,
-            OpcodeGroupsToServer = Opcode.GROUP_ALL,
+            OpcodeGroupsToServer = Opcode.GROUP_ALL
         };
 
         // Set the channel key to use
         var channelKey = Environment.GetEnvironmentVariable("IKON_SDK_CHANNEL_KEY") ?? "<<SET_CHANNEL_KEY_HERE>>";
 
-        _ikonClient = await Sdk.CreateIkonClientAsync(clientInfo);
+        _ikonClient = await Sdk.CreateIkonClientAsync(ikonClientInfo);
 
-        _channel = new Channel(_ikonClient, channelKey);
+        _channel = Channel.Create(_ikonClient, channelKey);
         _channel.Text += OnChannelText;
         _channel.AudioStreamBegin += OnAudioStreamBegin;
         _channel.AudioFrame += OnAudioFrame;
