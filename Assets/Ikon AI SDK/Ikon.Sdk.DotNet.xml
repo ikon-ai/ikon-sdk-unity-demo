@@ -332,6 +332,21 @@
             Unique identifier of the audio stream.
             </summary>
         </member>
+        <member name="T:Ikon.Sdk.DotNet.Channel.SpeechRecognizedArgs">
+            <summary>
+            Event arguments for SpeechRecognized event.
+            </summary>
+        </member>
+        <member name="P:Ikon.Sdk.DotNet.Channel.SpeechRecognizedArgs.WasSuccessful">
+            <summary>
+            Whether the speech recognition was successful.
+            </summary>
+        </member>
+        <member name="P:Ikon.Sdk.DotNet.Channel.SpeechRecognizedArgs.Text">
+            <summary>
+            The recognized text.
+            </summary>
+        </member>
         <member name="E:Ikon.Sdk.DotNet.Channel.Connected">
             <summary>
             Event that is triggered after the channel has been successfully connected and joined.
@@ -388,6 +403,11 @@
             Event that is triggered when an audio stream ends.
             </summary>
         </member>
+        <member name="E:Ikon.Sdk.DotNet.Channel.SpeechRecognized">
+            <summary>
+            Event that is triggered when speech is recognized.
+            </summary>
+        </member>
         <member name="M:Ikon.Sdk.DotNet.Channel.Create(Ikon.Sdk.DotNet.IIkonClient,System.String)">
             <summary>
             Create a new Channel instance.
@@ -410,14 +430,13 @@
             Wait for the AI agent client to connect to the channel and become ready.
             </summary>
         </member>
-        <member name="M:Ikon.Sdk.DotNet.Channel.SendText(System.String,System.Boolean,System.Boolean,System.Nullable{System.DateTime})">
+        <member name="M:Ikon.Sdk.DotNet.Channel.SendText(System.String,System.Boolean,System.Boolean)">
             <summary>
             Send a text message to the channel.
             </summary>
             <param name="text">Text to be sent</param>
             <param name="generateChatMessage">Whether to generate UI messages to the chat UI stream</param>
             <param name="sendBackToSender">Whether to route the message also back to the sender</param>
-            <param name="createdAt">Timestamp for the message. If left empty, server will set its own time to it at receive</param>
         </member>
         <member name="M:Ikon.Sdk.DotNet.Channel.SetState(System.String,System.Object)">
             <summary>
@@ -489,7 +508,7 @@
             Space ID. Get this from the Portal.
             </summary>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.Sdk.IkonClientInfo.UserId">
+        <member name="P:Ikon.Sdk.DotNet.Sdk.IkonClientInfo.ExternalUserId">
             <summary>
             User ID. This can be an arbitrary string given by you.
             </summary>

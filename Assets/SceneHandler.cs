@@ -64,7 +64,7 @@ public class SceneHandler : MonoBehaviour
             SpaceId = Environment.GetEnvironmentVariable("IKON_SDK_SPACE_ID") ?? "<<SET_SPACE_ID_HERE>>",
 
             // Set a unique ID for the player. This can be the player's ID in your game. This can be hardcoded.
-            UserId = Environment.GetEnvironmentVariable("IKON_SDK_USER_ID") ?? "<<SET_USER_ID_HERE>>",
+            ExternalUserId = Environment.GetEnvironmentVariable("IKON_SDK_USER_ID") ?? "<<SET_USER_ID_HERE>>",
 
             // Use the production endpoint by default. Set to false to use the development endpoint.
             UseProductionEndpoint = Environment.GetEnvironmentVariable("IKON_SDK_USE_PROD_ENDPOINT")?.Trim()
@@ -90,6 +90,7 @@ public class SceneHandler : MonoBehaviour
         _channel.AudioStreamBegin += OnAudioStreamBegin;
         _channel.AudioFrame += OnAudioFrame;
         _channel.AudioStreamEnd += OnAudioStreamEnd;
+        _channel.SpeechRecognized += OnSpeechRecognized;
 
         await _channel.ConnectAsync();
         _channel.SignalReady();
@@ -264,6 +265,20 @@ public class SceneHandler : MonoBehaviour
                 Destroy(audioStream.AudioSourceObject);
                 _audioStreams.Remove(e.StreamId);
             });
+        }
+    }
+
+    private async Task OnSpeechRecognized(object sender, Channel.SpeechRecognizedArgs e)
+    {
+        await Task.CompletedTask;
+
+        if (e.WasSuccessful)
+        {
+            Debug.Log($"Speech recognized: {e.Text}");
+        }
+        else
+        {
+            Debug.LogWarning("Speech could not be recognized");
         }
     }
 
