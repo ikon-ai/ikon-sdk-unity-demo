@@ -1,275 +1,322 @@
 # Ikon AI C# SDK
 
-Welcome to the Ikon AI C# SDK. This SDK is designed to help developers integrate and interact with Ikon's services easily using C#.
-The SDK provides a straightforward API to manage channels, handle events, communicate, and interact with the AI agent within the Ikon platform.
+Welcome to the Ikon AI C# SDK – a fast, flexible way to talk to Ikon spaces from any .NET 8 / .NET Standard 2.1 project (including Unity).  
+The SDK wraps the low-level protocol into an “easy-mode” `Channel` class, features automatic audio encoding/decoding, raw-message hooks, function calls, state management and much more.
+
+---
 
 ## Features
 
-- Initialize clients with developer credentials
-- Connect to and manage multiple channels
-- Send and receive text messages within channels
-- Send and receive audio streams
-- Register and handle custom functions callable from the AI agent
-- Manage state variables and message history
-- Event handling for various channel events, including connection, disconnection, and message events
+- Create clients with rich connection, debugging & performance options  
+- Automatic caching of channel instances (`Channel.Create`)  
+- Text messaging with optional UI-chat generation & echo‐back  
+- Audio streaming  
+  - Opus encode / decode included  
+  - Three streaming modes (`Streaming`, `DelayUntilTotalDurationKnown`, `DelayUntilIsLast`)  
+  - Runtime **sample-rate override** & **streaming-mode override** on the receiver side  
+  - Runtime **fade-out** of server-side audio (`FadeoutAudio`)  
+- Register **custom functions** callable from the AI agent (0–4 parameters, any return type)  
+- Real-time **speech-to-text** callbacks  
+- Classification, usage, analytics & special-log callbacks (server log rendering supported)  
+- Fine-grained **raw protocol access** – inspect or filter every incoming `ProtocolMessage` (`ReceiveMessage` event)  
+- Send **custom protocol payloads** of your own (`SendMessage<T>`)  
+- Manage LLM-shader state, trigger answer generation, clear chat history  
+- Full control over opcode groups & payload format (`MemoryPack` or `MsgPack`)  
+
+---
 
 ## Installation
 
-To start using the Ikon AI C# SDK, include the libraries in your C# project. Ensure that your project is compatible with .NET 8.0 or .NET Standard 2.1.
+Target **.NET 8.0** or **.NET Standard 2.1** and add the NuGet package:
+
+```bash
+dotnet add package Ikon.Sdk.DotNet
+```
+
+---
 
 ## Usage
 
-### Creating an Ikon Client
-
-To create an Ikon client instance, you need an API key, a space ID, and a user ID.
+### 1. Creating an Ikon client
 
 ```csharp
 var ikonClientInfo = new Sdk.IkonClientInfo
 {
-    // Get the API key from the Ikon Portal and then supply it with e.g. environment variable. Do not hardcode it.
-    ApiKey = Environment.GetEnvironmentVariable("IKON_SDK_API_KEY") ?? throw new Exception("API key is missing. Please set the 'IKON_SDK_API_KEY' environment variable."),
+    // --- Mandatory credentials ( NEVER hard-code the API key ) ---
+    ApiKey         = Environment.GetEnvironmentVariable("IKON_SDK_API_KEY")
+                     ?? throw new Exception("Set IKON_SDK_API_KEY."),
+    SpaceId        = Environment.GetEnvironmentVariable("IKON_SDK_SPACE_ID") ?? "<<SPACE_ID>>",
+    ExternalUserId = Environment.GetEnvironmentVariable("IKON_SDK_USER_ID") ?? "<<USER_ID>>",
 
-    // Get the space ID from Ikon Portal. This can be hardcoded.
-    SpaceId = Environment.GetEnvironmentVariable("IKON_SDK_SPACE_ID") ?? "<<SET_SPACE_ID_HERE>>",
+    // --- Connection / infrastructure ---
+    UseProductionEndpoint = (Environment.GetEnvironmentVariable("IKON_SDK_USE_PROD_ENDPOINT") ?? "true")
+                            .Equals("true", StringComparison.OrdinalIgnoreCase),
+    HasInput              = false,     // set ‘true’ if you plan to immediately send input after connect
+    ReceiveAllMessages    = false,     // set ‘true’ to get every message, not only the ones addressed to you
+    BackendRequestTimeout       = 10,
+    BackendChannelConnectTimeout = 10,
+    ServerChannelConnectTimeout  = 10,
 
-    // Set a unique ID for the player. This can be the player's ID in your game. This can be hardcoded.
-    UserId = Environment.GetEnvironmentVariable("IKON_SDK_USER_ID") ?? "<<SET_USER_ID_HERE>>",
+    // --- Debug / performance ---
+    EnableServerLogRendering = false,  // render server logs (dev environment only)
+    LogAllBackendRequests    = false,
+    PayloadType              = PayloadType.MemoryPack, // MemoryPack (default) or MsgPack
+    OpcodeGroupsFromServer   = Opcode.GROUP_ALL,
+    OpcodeGroupsToServer     = Opcode.GROUP_ALL,
 
-    // Use the production endpoint by default. Set to false to use the development endpoint.
-    UseProductionEndpoint = Environment.GetEnvironmentVariable("IKON_SDK_USE_PROD_ENDPOINT")?.Trim().Equals("true", StringComparison.InvariantCultureIgnoreCase) ?? true,
-
-    Description = "Example",
-    DeviceId = Utils.GenerateDeviceId(),
-    ProductId = "Ikon.Sdk.DotNet.Example",
-    VersionId = Version.VersionString,
-    InstallId = "1",
-    UserType = UserType.Human,
-    OpcodeGroupsFromServer = Opcode.GROUP_ALL,
-    OpcodeGroupsToServer = Opcode.GROUP_ALL,
+    // --- Identification ---
+    Description = "Ikon AI C# SDK Example",
+    DeviceId    = Utils.GenerateDeviceId(),
+    ProductId   = "Ikon.Sdk.DotNet.Example",
+    Version     = 1,
+    UserType    = UserType.Human,
+    ClientType  = ClientType.Unknown,
+    Locale      = "en-us",
+    UserAgent   = "ikon-sdk-example/1.0.0",
 };
 
-// Create an Ikon client
-var ikonClient = await Sdk.CreateIkonClientAsync(ikonClientInfo);
+await using IIkonClient ikonClient = await Sdk.CreateIkonClientAsync(ikonClientInfo);
 ```
 
-### Managing Channels
+> Internal testing helpers  
+> • `UseLocalIkonServer`, `LocalIkonServerHost`, `LocalIkonServerPort`, `LocalIkonServerUserId` allow you to redirect a client to a locally running Ikon server build.
 
-Once the client is initialized, you can connect to a channel, send messages, and handle various channel-related events.
+---
+
+### 2. Managing channels
 
 ```csharp
-// Set the channel key to use
-var channelKey = Environment.GetEnvironmentVariable("IKON_SDK_CHANNEL_KEY") ?? "<<SET_CHANNEL_KEY_HERE>>";
+string channelKey = Environment.GetEnvironmentVariable("IKON_SDK_CHANNEL_KEY") ?? "<<CHANNEL_KEY>>";
 
-// Create or get a channel instance
-var channel = Channel.Create(ikonClient, channelKey);
+// Channel.Create automatically caches (ikonClient, channelKey)
+Channel channel = Channel.Create(ikonClient, channelKey);
 
-// Subscribe to channel events
-channel.Connected += OnChannelConnected;
-channel.Stopping += OnChannelStopping;
-channel.Disconnected += OnChannelDisconnected;
-// Subscribe to other events as needed...
+// -----------------------------------------------------------------
+// Subscribe to the events *you* care about
+// -----------------------------------------------------------------
+channel.Connected            += OnConnected;
+channel.Stopping             += OnStopping;
+channel.Disconnected         += OnDisconnected;
+channel.ReceiveMessage       += OnRawMessage;             // NEW: raw protocol hook
+channel.Text                 += OnText;
+channel.SpeechRecognized     += OnSpeech;
+channel.ClassificationResult += OnClassificationResult;
+channel.SpecialLog           += OnSpecialLog;
+channel.Usage                += OnUsage;
+channel.AudioStreamBegin     += OnAudioStreamBegin;
+channel.AudioFrame           += OnAudioFrame;
+channel.AudioStreamEnd       += OnAudioStreamEnd;
 
-// Connect to the channel
+// Connect & wait for the space
 await channel.ConnectAsync();
-
-// Signal readiness to other clients in the channel
-channel.SignalReady();
-
-// Wait for the AI agent to become ready
-await channel.WaitForAIAgentAsync();
+channel.SignalReady();                 // tell other clients you are ready
+await channel.WaitForAIAgentAsync();   // wait for the AI agent to join
 ```
 
-### Sending and Receiving Text Messages
+---
 
-To send text messages to a channel and receive messages:
+### 3. Text messaging
 
 ```csharp
-// Sending a text message
+// Send a message – let the server build chat-history entries (UI) and also echo it back
 channel.SendText("Hello, Ikon!", generateChatMessage: true, sendBackToSender: true);
 
-// Handling received text messages
-channel.Text += OnChannelText;
-
-private async Task OnChannelText(object sender, Channel.TextArgs e)
+private async Task OnText(object s, Channel.TextArgs e)
 {
     await Task.CompletedTask;
-    Console.WriteLine($"\n{e.UserName}: {e.Text}\n");
+    Console.WriteLine($"{e.UserName}: {e.Text}");
 }
 ```
 
-### Sending and Receiving Audio Streams
+---
 
-You can send and receive audio streams in real-time.
+### 4. Audio streaming
 
-#### Sending Audio
-
-To send audio to the channel:
+#### Sending audio
 
 ```csharp
-// Prepare your audio samples as a float array
-float[] samples = ...; // Your audio samples
-int sampleRate = 48000; // Sample rate of your audio
-int channels = 1; // Number of audio channels
+ReadOnlyMemory<float> samples = GetMicrophoneBuffer(); // any length
+int sampleRate = 48_000;
+int channels   = 1;
 
-// Send the audio samples
-channel.SendAudio(samples, sampleRate, channels, isFirst: true, isLast: true);
+// isFirst / isLast allow either streaming or one-shot clips
+channel.SendAudio(samples, sampleRate, channels,
+                  isFirst: true, isLast: true, id: "mic_stream");
 
-// Optionally, fade out any ongoing audio streams
-channel.FadeoutAudio(2.0f); // Fade out over 2 seconds
+// Ask the server to gracefully fade-out any currently playing streams
+channel.FadeoutAudio(1.5f);   // seconds
 ```
 
-#### Receiving Audio
-
-Handle audio stream events to receive audio from the channel:
+#### Receiving audio
 
 ```csharp
-channel.AudioStreamBegin += OnChannelAudioStreamBegin;
-channel.AudioFrame += OnChannelAudioFrame;
-channel.AudioStreamEnd += OnChannelAudioStreamEnd;
-
-private async Task OnChannelAudioStreamBegin(object sender, Channel.AudioStreamBeginArgs e)
+private async Task OnAudioStreamBegin(object s, Channel.AudioStreamBeginArgs e)
 {
+    // --- Optional runtime overrides ---
+    // e.SampleRate    = 44_100;                                // resample
+    // e.StreamingMode = AudioStreamingMode.DelayUntilIsLast;   // buffer & play later
     await Task.CompletedTask;
-    Console.WriteLine($"Audio Stream Begin: StreamId={e.StreamId}, SampleRate={e.SampleRate}, Channels={e.Channels}");
 }
 
-private async Task OnChannelAudioFrame(object sender, Channel.AudioFrameArgs e)
+private async Task OnAudioFrame(object s, Channel.AudioFrameArgs e)
 {
     await Task.CompletedTask;
-    // Process the received audio samples
-    var samples = e.Samples;
-    // ...
+    // e.Samples             : decoded pcm
+    // e.IsFirst / e.IsLast
+    // e.DurationSinceIsFirst
+    // e.TotalDuration       : 0 until known (depends on streaming mode)
 }
 
-private async Task OnChannelAudioStreamEnd(object sender, Channel.AudioStreamEndArgs e)
+private async Task OnAudioStreamEnd(object s, Channel.AudioStreamEndArgs e)
 {
     await Task.CompletedTask;
-    Console.WriteLine($"Audio Stream End: StreamId={e.StreamId}");
 }
 ```
 
-### Registering Functions for the AI Agent
+`AudioStreamingMode` cheat-sheet:
 
-You can register functions in your code that the AI agent can call during conversation. This allows for dynamic interactions where the AI agent can execute code in your application.
+| Mode | Behaviour |
+|------|-----------|
+| `Streaming` | Forward frames immediately (lowest latency) |
+| `DelayUntilTotalDurationKnown` | Buffer until the server sends the total length, then play with original timing |
+| `DelayUntilIsLast` | Buffer everything, play in one go when the last frame arrives |
 
-#### Register a Function
+---
+
+### 5. Real-time speech recognition
 
 ```csharp
+private async Task OnSpeech(object s, Channel.SpeechRecognizedArgs e)
+{
+    await Task.CompletedTask;
+    Console.WriteLine($"Speech recognized: success={e.WasSuccessful}, text='{e.Text}'");
+}
+```
+
+---
+
+### 6. Registering functions callable by the AI agent
+
+```csharp
+// Up to 4 parameters – type order: <T1,[T2,T3,T4], TResult>
 channel.RegisterFunction<int, string, string>("example_function", ExampleFunction);
-```
 
-#### Define the Function
-
-```csharp
-private async Task<string> ExampleFunction(int argument1, string argument2)
+private async Task<string> ExampleFunction(int number, string text)
 {
     await Task.CompletedTask;
-    // Implement your logic here
-    return $"Function result: {argument1}, {argument2}";
+    return $"Echo: {number} / {text}";
 }
 ```
 
-### Managing State and Message History
+The SDK serialises/validates parameters, invokes your callback and returns the JSON result to the agent automatically.
 
-You can set and manage state variables, control message history, and control the AI agent's response generation.
+---
+
+### 7. State & history management
 
 ```csharp
-// Set a state variable
-channel.SetState("ExampleVariable", 123);
-
-// Clear all state variables
+// LLM-shader state variables (only keys defined in the shader’s Input section)
+channel.SetState("Health", 42);
 channel.ClearState();
 
-// Instruct the AI agent to generate an answer without providing new input
+// Trigger answer generation even when you have no new input
 channel.GenerateAnswer();
 
-// Clear the message history of the whole channel
-channel.ClearMessageHistory();
+// Remove the complete chat history for this channel
+channel.ClearChatMessageHistory();
 ```
 
-### Handling Channel Events
+---
 
-Implement event handlers to manage different channel events, such as connection status, messages, and custom events.
+### 8. Low-level protocol access
+
+Need full control? Hook `ReceiveMessage` or send custom payloads:
 
 ```csharp
-// Subscribe to events
-channel.Connected += OnChannelConnected;
-channel.Stopping += OnChannelStopping;
-channel.Disconnected += OnChannelDisconnected;
-channel.Text += OnChannelText;
-channel.ClassificationResult += OnChannelClassificationResult;
-channel.SpecialLog += OnChannelSpecialLog;
-channel.Usage += OnChannelUsage;
-channel.AudioStreamBegin += OnChannelAudioStreamBegin;
-channel.AudioFrame += OnChannelAudioFrame;
-channel.AudioStreamEnd += OnChannelAudioStreamEnd;
-
-// Event handler examples
-private async Task OnChannelConnected(object sender, Channel.ConnectedArgs e)
+private async Task OnRawMessage(object s, MessageEventArgs e)
 {
     await Task.CompletedTask;
-    Console.WriteLine("Connected to the channel");
+    Console.WriteLine($"[RAW] {e.Message.Opcode} len={e.Message.DataLength}");
 }
 
-private async Task OnChannelStopping(object sender, Channel.StoppingArgs e)
-{
-    await Task.CompletedTask;
-    Console.WriteLine("Channel is stopping");
-}
-
-private async Task OnChannelDisconnected(object sender, Channel.DisconnectedArgs e)
-{
-    await Task.CompletedTask;
-    Console.WriteLine("Disconnected from the channel");
-}
-
-private async Task OnChannelClassificationResult(object sender, Channel.ClassificationResultArgs e)
-{
-    await Task.CompletedTask;
-    Console.WriteLine($"Classification Result: {e.Result}");
-}
-
-private async Task OnChannelSpecialLog(object sender, Channel.SpecialLogArgs e)
-{
-    await Task.CompletedTask;
-    Console.WriteLine($"Special Log - {e.Title}:\n{e.Message}");
-}
-
-private async Task OnChannelUsage(object sender, Channel.UsageArgs e)
-{
-    await Task.CompletedTask;
-    Console.WriteLine($"Usage - {e.UsageName}: {e.Usage}");
-}
+// Send your own Ikon.Common.Core.Protocol payload
+channel.SendMessage(new CustomPayload { /* … */ });
 ```
 
-### Helper Functions
+---
 
-The SDK provides several helper functions to manage state and control the AI agent's behavior:
+### 9. Handling other channel events
 
 ```csharp
-channel.SetState("TestVariable", 1234); // Set a variable defined in the Input section
-channel.ClearState(); // Clear all variables from the state
-channel.GenerateAnswer(); // Generate an answer without providing any input
-channel.ClearMessageHistory(); // Clear the message history of the whole channel
-channel.FadeoutAudio(2.0f); // Send a signal to fade out audio streams over 2 seconds
+private async Task OnConnected(object s, Channel.ConnectedArgs e)
+{
+    await Task.CompletedTask;
+    Console.WriteLine("Channel connected");
+}
+
+private async Task OnStopping(object s, Channel.StoppingArgs e)
+{
+    await Task.CompletedTask;
+    Console.WriteLine("Channel stopping – still allowed to send msgs");
+}
+
+private async Task OnDisconnected(object s, Channel.DisconnectedArgs e)
+{
+    await Task.CompletedTask;
+    Console.WriteLine("Channel disconnected");
+}
+
+private async Task OnClassificationResult(object s, Channel.ClassificationResultArgs e)
+{
+    await Task.CompletedTask;
+    Console.WriteLine($"Classification result: {e.Result}");
+}
+
+private async Task OnSpecialLog(object s, Channel.SpecialLogArgs e)
+{
+    await Task.CompletedTask;
+    Console.WriteLine($"[SpecialLog] {e.Title}\n{e.Message}");
+}
+
+private async Task OnUsage(object s, Channel.UsageArgs e)
+{
+    await Task.CompletedTask;
+    Console.WriteLine($"Usage '{e.UsageName}': {e.Usage:F2}");
+}
 ```
 
-### Example Program
+---
 
-An up-to-date example program is included in the `Ikon.Sdk.DotNet.Examples.Chat/Program.cs` source file. This example demonstrates how to:
+### 10. Example program
 
-- Initialize the Ikon client
-- Connect to a channel
-- Send and receive text messages
-- Handle various events
-- Register custom functions callable by the AI agent
-- Manage state variables and message history
-- Send and receive audio streams
+A complete command-line chat sample is included at  
+`examples/Ikon.Sdk.DotNet.Examples.Chat/Program.cs`.
+
+It showcases:
+
+- Client creation & configuration  
+- Connecting, signalling readiness, waiting for the AI agent  
+- Text & audio send / receive, fade-out  
+- Speech-recognition callbacks  
+- Function registration  
+- State management & chat-history control  
+- Raw message inspection  
+- Graceful shutdown  
+
+Run it:
+
+```bash
+dotnet run --project examples/Ikon.Sdk.DotNet.Examples.Chat
+```
+
+(Ensure `IKON_SDK_API_KEY`, `IKON_SDK_SPACE_ID`, `IKON_SDK_CHANNEL_KEY` and `IKON_SDK_USER_ID` are set.)
+
+---
 
 ## License
 
-This SDK is licensed under the Ikon AI SDK License. See the LICENSE file for more details.
+This SDK is licensed under the Ikon AI SDK License – see `LICENSE` for details.
 
 ## Support
 
-For support, please open an issue on our GitHub repository or contact our support team through our support channel.
+Open an issue on GitHub or contact Ikon support.

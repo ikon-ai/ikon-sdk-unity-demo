@@ -347,6 +347,11 @@
             The recognized text.
             </summary>
         </member>
+        <member name="E:Ikon.Sdk.DotNet.Channel.ReceiveMessage">
+            <summary>
+            Event that is triggered after a message is received.
+            </summary>
+        </member>
         <member name="E:Ikon.Sdk.DotNet.Channel.Connected">
             <summary>
             Event that is triggered after the channel has been successfully connected and joined.
@@ -461,10 +466,17 @@
             Trigger the generation of an answer by the AI agent without sending any input.
             </summary>
         </member>
-        <member name="M:Ikon.Sdk.DotNet.Channel.ClearMessageHistory">
+        <member name="M:Ikon.Sdk.DotNet.Channel.ClearChatMessageHistory">
             <summary>
-            Clear the whole message history of the channel.
+            Clear the whole chat message history of the channel.
             </summary>
+        </member>
+        <member name="M:Ikon.Sdk.DotNet.Channel.SendMessage``1(``0)">
+            <summary>
+            Sends message to server.
+            </summary>
+            <param name="message"></param>
+            <returns></returns>
         </member>
         <member name="M:Ikon.Sdk.DotNet.Channel.FadeoutAudio(System.Single)">
             <summary>
@@ -528,9 +540,9 @@
             Product code of the client.
             </summary>
         </member>
-        <member name="P:Ikon.Sdk.DotNet.Sdk.IkonClientInfo.VersionId">
+        <member name="P:Ikon.Sdk.DotNet.Sdk.IkonClientInfo.Version">
             <summary>
-            Version ID of the client.
+            Version of the client.
             </summary>
         </member>
         <member name="P:Ikon.Sdk.DotNet.Sdk.IkonClientInfo.InstallId">
@@ -543,9 +555,19 @@
             Locale of the client.
             </summary>
         </member>
+        <member name="P:Ikon.Sdk.DotNet.Sdk.IkonClientInfo.UserAgent">
+            <summary>
+            User agent of the client.
+            </summary>
+        </member>
         <member name="P:Ikon.Sdk.DotNet.Sdk.IkonClientInfo.UserType">
             <summary>
             User type of the client.
+            </summary>
+        </member>
+        <member name="P:Ikon.Sdk.DotNet.Sdk.IkonClientInfo.ClientType">
+            <summary>
+            Client type of the client.
             </summary>
         </member>
         <member name="P:Ikon.Sdk.DotNet.Sdk.IkonClientInfo.PayloadType">
@@ -571,6 +593,11 @@
             Whether to client is going to send input immediately to the server after connecting (automatic answer generation at connect will be disabled).
             </summary>
         </member>
+        <member name="P:Ikon.Sdk.DotNet.Sdk.IkonClientInfo.ReceiveAllMessages">
+            <summary>
+            Whether to receive all messages, even those that are not targeted to the client.
+            </summary>
+        </member>
         <member name="P:Ikon.Sdk.DotNet.Sdk.IkonClientInfo.BackendRequestTimeout">
             <summary>
             Default timeout for backend requests in seconds.
@@ -584,11 +611,6 @@
         <member name="P:Ikon.Sdk.DotNet.Sdk.IkonClientInfo.ServerChannelConnectTimeout">
             <summary>
             Default timeout for channel connect in seconds (server).
-            </summary>
-        </member>
-        <member name="P:Ikon.Sdk.DotNet.Sdk.IkonClientInfo.IsReadyTimeout">
-            <summary>
-            Default timeout for calling the SignalReady method in seconds.
             </summary>
         </member>
         <member name="P:Ikon.Sdk.DotNet.Sdk.IkonClientInfo.UseProductionEndpoint">

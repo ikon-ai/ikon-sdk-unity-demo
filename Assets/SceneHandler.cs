@@ -19,7 +19,7 @@ public class SceneHandler : MonoBehaviour
 
     private IIkonClient _ikonClient;
     private Channel _channel;
-    private readonly ConcurrentQueue<Action> _mainThreadActions = new();
+    private readonly ConcurrentQueue<System.Action> _mainThreadActions = new();
     private readonly Dictionary<string, AudioStream> _audioStreams = new();
     private AudioClip _recordingAudioClip;
     private bool _shouldStartRecording;
@@ -73,7 +73,6 @@ public class SceneHandler : MonoBehaviour
             Description = "Ikon AI SDK Unity Example",
             DeviceId = Utils.GenerateDeviceId(),
             ProductId = "Ikon.Sdk.DotNet.Examples.Unity",
-            VersionId = "1",
             InstallId = "1",
             UserType = UserType.Human,
             OpcodeGroupsFromServer = Opcode.GROUP_ALL,
@@ -286,14 +285,14 @@ public class SceneHandler : MonoBehaviour
     {
         switch (logEvent.Type)
         {
-            case Ikon.Common.Core.Protocol.LogType.Warning:
+            case Ikon.Common.Core.LogType.Warning:
             {
                 Debug.LogWarning($"{logEvent.Type}: {logEvent.Message}");
                 break;
             }
 
-            case Ikon.Common.Core.Protocol.LogType.Error:
-            case Ikon.Common.Core.Protocol.LogType.Critical:
+            case Ikon.Common.Core.LogType.Error:
+            case Ikon.Common.Core.LogType.Critical:
             {
                 Debug.LogError($"{logEvent.Type}: {logEvent.Message}");
                 break;
